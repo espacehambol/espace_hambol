@@ -12,7 +12,12 @@ export async function GET(req: Request) {
           room: { siteId }
         },
         include: {
-          room: true,
+          room: {
+            include: {
+              site: true,
+              roomType: true,
+            }
+          },
           client: true,
         },
         orderBy: { createdAt: 'desc' },
