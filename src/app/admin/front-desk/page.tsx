@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useSite } from '@/context/SiteContext';
 
 interface Reservation {
   id: string;
@@ -17,13 +18,16 @@ interface Reservation {
 }
 
 export default function FrontDeskDashboard() {
+  const { currentSite } = useSite();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/reservations');
+      const siteMapping: Record<string, string> = { 'Azaguié': 'azaguie', 'Yopougon': 'yopougon' };
+      const siteId = siteMapping[currentSite] || 'azaguie';
+      const res = await fetch(`/api/admin/reservations?siteId=${siteId}`);
       const data = await res.json();
       setReservations(data.reservations || []);
     } catch (err) {
@@ -31,11 +35,12 @@ export default function FrontDeskDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentSite]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReservations();
-  }, []);
+  }, [fetchReservations]);
 
   const updateStatus = async (id: string, status: string) => {
     try {
