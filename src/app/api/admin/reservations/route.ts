@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { sendReservationStatusEmail } from '@/lib/email';
 
 export async function GET(req: Request) {
   try {
@@ -45,6 +46,12 @@ export async function PATCH(req: Request) {
       where: { id },
       data: { status },
     });
+
+    if (status === 'CONFIRMED' || status === 'CANCELLED') {
+      sendReservationStatusEmail(reservation.id).catch((err) => {
+        console.error('Failed to send reservation status email:', err);
+      });
+    }
 
     return NextResponse.json({ success: true, reservation });
   } catch (error) {

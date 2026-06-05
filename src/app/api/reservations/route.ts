@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { sendReservationRequestEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -60,6 +61,11 @@ export async function POST(req: Request) {
         status: 'PENDING',
         totalPrice: parseFloat(totalPrice.toString()),
       },
+    });
+
+    // Envoi de l'e-mail de confirmation de demande en arrière-plan
+    sendReservationRequestEmail(reservation.id).catch((err) => {
+      console.error('Failed to send reservation request email:', err);
     });
 
     return NextResponse.json({ success: true, reservation });
