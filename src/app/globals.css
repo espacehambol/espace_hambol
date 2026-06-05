@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F5EDE0; /* Sable chaud */
+  --foreground: #171717;
+  
+  /* Default (Yopougon) palette – overridden by SiteContext via JS */
+  --color-primary:    #8B3A1A;
+  --color-primary-dk: #5C2410;
+  --color-accent:     #D4956A;
+  --color-bg:         #F5EDE0;
+  --color-text:       #6B5C4E;
+  --color-hero-dark:  #1A0E08;
+  --color-badge-bg:   #8B3A1A;
+
+  /* Legacy tokens kept for backwards compat */
+  --terre-hambol: #8B3A1A;
+  --vert-hambol:  #2E7D1E;
+  --sable-chaud:  #F5EDE0;
+  --terre-cuite:  #D4956A;
+}
+
+/* Azaguié Green override - applied via data-site attribute by SiteContext */
+[data-site="Azaguié"] {
+  --background:       #F0F5EC;
+  --color-bg:         #F0F5EC;
+  --color-primary:    #2D6A4F;
+  --color-primary-dk: #1B4332;
+  --color-accent:     #74C69D;
+  --color-hero-dark:  #0A1F15;
+  --color-badge-bg:   #2D6A4F;
+  /* Legacy tokens kept for backwards compat */
+  --terre-hambol:     #2D6A4F;
+  --vert-hambol:      #74C69D;
+  --sable-chaud:      #F0F5EC;
+  --terre-cuite:      #74C69D;
+}
+
+
+@theme inline {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  
+  --color-primary:    var(--color-primary);
+  --color-primary-dk: var(--color-primary-dk);
+  --color-accent:     var(--color-accent);
+  --color-secondary:  var(--color-accent);
+  --color-sand:       var(--color-bg);
+  --color-hero-dark:  var(--color-hero-dark);
+
+  --font-title: "Playfair Display", serif;
+  --font-body:  "Nunito Sans", sans-serif;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Scroll Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+}
+
+@keyframes slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-slow-zoom {
+  animation: slow-zoom 20s linear infinite alternate;
+}
+
+.animate-fade-in {
+  animation: fade-in 1.5s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.delay-200 { animation-delay: 200ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+/* Custom Scrollbar for Luxury Feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}

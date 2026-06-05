@@ -1,0 +1,68 @@
+{
+  "Azaguié": {
+    "popup": {
+      "enabled": false,
+      "imageUrl": "",
+      "link": "",
+      "title": "Offre Spéciale Azaguié"
+    },
+    "floatingAd": {
+      "enabled": false,
+      "imageUrl": "",
+      "link": "",
+      "title": "Découvrez nos offres",
+      "delayMs": 6000,
+      "intervalMs": 45000
+    },
+    "socials": [
+      {
+        "id": "fb",
+        "platform": "facebook",
+        "url": "https://www.facebook.com/share/1Hdt2EsaiS/",
+        "enabled": true
+      },
+      {
+        "id": "tt",
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@commercial.espacehambolg?_r=1&_t=ZS-96vaoWO4Ua4",
+        "enabled": true
+      },
+      {
+        "id": "social-1780585246857",
+        "platform": "instagram",
+        "url": "https://www.instagram.com/espacehambol",
+        "enabled": true
+      }
+    ]
+  },
+  "Yopougon": {
+    "popup": {
+      "enabled": false,
+      "imageUrl": "",
+      "link": "",
+      "title": "Offre Spéciale Yopougon"
+    },
+    "floatingAd": {
+      "enabled": false,
+      "imageUrl": "",
+      "link": "",
+      "title": "Découvrez nos offres",
+      "delayMs": 6000,
+      "intervalMs": 45000
+    },
+    "socials": [
+      {
+        "id": "fb",
+        "platform": "facebook",
+        "url": "https://www.facebook.com/share/1Hdt2EsaiS/",
+        "enabled": true
+      },
+      {
+        "id": "tt",
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@commercial.espacehambolg?_r=1&_t=ZS-96vaoWO4Ua4",
+        "enabled": true
+      }
+    ]
+  }
+}
