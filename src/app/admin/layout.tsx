@@ -99,6 +99,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     position === 'SUPER_ADMIN' || item.roles.includes(position)
   );
 
+  // Check page authorization
+  const currentMenuItem = ALL_MENU_ITEMS.find(item => 
+    pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path + '/'))
+  );
+  const isAuthorized = !currentMenuItem || position === 'SUPER_ADMIN' || currentMenuItem.roles.includes(position);
+
   return (
     <div className="flex h-screen bg-[#F8F9FA] text-[#1A1208]">
       {/* Sidebar */}
@@ -185,7 +191,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         <div className="p-10">
-          {children}
+          {isAuthorized ? children : (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-[3rem] p-12 shadow-sm border border-gray-100 space-y-6 text-center animate-fade-in">
+              <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-5xl animate-bounce">
+                🔏
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-title font-bold text-primary">Accès Restreint</h2>
+                <p className="text-gray-500 max-w-md text-sm">
+                  Votre profil (<strong>{POSITION_LABELS[position] || position}</strong>) ne dispose pas des autorisations nécessaires pour accéder à l'espace <strong>{currentMenuItem?.name}</strong>.
+                </p>
+              </div>
+              <button 
+                onClick={() => router.push('/admin')} 
+                className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-xl hover:bg-primary-dk transition-all"
+              >
+                Retour au Tableau de Bord
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>
