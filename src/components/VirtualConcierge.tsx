@@ -92,11 +92,11 @@ export default function VirtualConcierge() {
             options: [
               { 
                 label: "🗺️ Voir Azaguié Ahoua", 
-                action: () => { window.open('https://maps.app.goo.gl/g6z9G5jBvN6h5BvN6', '_blank'); resetToMain(); } 
+                action: () => { window.open('https://www.google.com/maps/search/R%C3%A9sidence%20H%C3%B4tel%20Hambol/@5.64535665512085,-4.056880950927734,17z?hl=fr', '_blank'); resetToMain(); } 
               },
               { 
-                label: "🗺️ Voir Yopougon Ananeraie", 
-                action: () => { window.open('https://maps.app.goo.gl/Qx9vK2jBvN6h5BvN6', '_blank'); resetToMain(); } 
+                label: "🗺️ Voir Yopougon (Rue S450)", 
+                action: () => { window.open('https://maps.app.goo.gl/mA3rBHcewxqJJJo17', '_blank'); resetToMain(); } 
               },
               {
                 label: "🔙 Retour au menu principal",
