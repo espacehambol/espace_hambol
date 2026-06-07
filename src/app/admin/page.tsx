@@ -18,6 +18,7 @@ interface Stats {
     occupiedRooms: number;
     totalRooms: number;
     occupancyRate: number;
+    projectedOccupancy?: number;
     revenue: number;
     adr: number;
     revpar: number;

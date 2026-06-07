@@ -265,8 +265,8 @@ export async function GET(request: NextRequest) {
 
     // Migrate existing Review table if it exists
     try {
-      await prisma.$executeRawUnsafe(\`ALTER TABLE "Review" ADD COLUMN "status" TEXT NOT NULL DEFAULT 'PENDING'\`);
-      await prisma.$executeRawUnsafe(\`ALTER TABLE "Review" ADD COLUMN "site" TEXT NOT NULL DEFAULT 'Yopougon'\`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE "Review" ADD COLUMN "status" TEXT NOT NULL DEFAULT 'PENDING'`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE "Review" ADD COLUMN "site" TEXT NOT NULL DEFAULT 'Yopougon'`);
       console.log('[Setup] Added status and site columns to Review table');
     } catch (e) {
       // Ignorer si les colonnes existent déjà

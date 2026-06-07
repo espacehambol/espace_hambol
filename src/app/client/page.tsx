@@ -193,7 +193,7 @@ export default function ClientDashboard() {
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Site concerné</label>
                     <select 
                       value={reviewSite} 
-                      onChange={(e) => setReviewSite(e.target.value)}
+                      onChange={(e) => setReviewSite(e.target.value as 'Azaguié' | 'Yopougon')}
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent text-primary font-bold"
                     >
                       <option value="Azaguié">Hambol Azaguié</option>
