@@ -4,7 +4,7 @@ import "./globals.css";
 import { SiteProvider } from "@/context/SiteContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
-import WhatsAppFloat from "@/components/WhatsAppFloat";
+import VirtualConcierge from "@/components/VirtualConcierge";
 import SocialMediaFloat from "@/components/SocialMediaFloat";
 import GlobalPopup from "@/components/GlobalPopup";
 import FloatingAd from "@/components/FloatingAd";
@@ -73,7 +73,7 @@ export default function RootLayout({
             <main className="flex-1">
               {children}
             </main>
-            <WhatsAppFloat />
+            <VirtualConcierge />
             <SocialMediaFloat />
             <GlobalPopup />
             <FloatingAd />
