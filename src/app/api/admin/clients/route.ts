@@ -14,13 +14,13 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const formatted = clients.map(c => ({
+    const formatted = clients.map((c: any) => ({
       id: c.id,
       name: c.name || 'Inconnu',
       email: c.email,
       tier: c.loyalty?.tier || 'STANDARD',
       visits: c.reservations.length,
-      spent: c.transactions.reduce((sum, t) => sum + t.amount, 0),
+      spent: c.transactions.reduce((sum: number, t: any) => sum + t.amount, 0),
     }));
 
     return NextResponse.json({ clients: formatted });
