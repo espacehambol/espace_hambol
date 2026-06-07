@@ -53,6 +53,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [user, isAuthenticated, isLoading, router]);
 
+  // ── Intercepteur de requêtes fetch pour injecter les entêtes d'autorisation ────
+  useEffect(() => {
+    if (!user) return;
+    const originalFetch = window.fetch;
+    window.fetch = function (input, init) {
+      const urlStr = typeof input === 'string' ? input : input instanceof URL ? input.toString() : '';
+      const isApiUrl = urlStr.startsWith('/api/') || urlStr.startsWith(window.location.origin + '/api/');
+      
+      if (isApiUrl) {
+        const reqInit: RequestInit = init || {};
+        reqInit.headers = reqInit.headers || {};
+        const headers: Record<string, string> = {
+          'x-user-id': user.id || '',
+          'x-user-role': user.role || '',
+          'x-user-position': user.position || '',
+        };
+        if (reqInit.headers instanceof Headers) {
+          Object.entries(headers).forEach(([k, v]) => (reqInit.headers as Headers).set(k, v));
+        } else if (Array.isArray(reqInit.headers)) {
+          Object.entries(headers).forEach(([k, v]) => (reqInit.headers as string[][]).push([k, v]));
+        } else {
+          reqInit.headers = { ...reqInit.headers, ...headers };
+        }
+        return originalFetch(input, reqInit);
+      }
+      return originalFetch(input, init);
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [user]);
+
   // Pendant le chargement initial ou si non autorisé, on peut afficher un loader ou rien
   if (isLoading || !user || user.role === 'CLIENT') {
     return (

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const siteId = searchParams.get('siteId') || 'azaguie';
@@ -21,6 +25,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const { name, description, photoUrl, roomNumber, siteId, dateFound } = body;
@@ -45,6 +52,9 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const { id, status, trackingNumber } = body;
@@ -66,6 +76,9 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 export async function GET(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   const { searchParams } = new URL(request.url);
   const siteId = searchParams.get('siteId');
 
@@ -21,6 +25,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     const item = await (prisma as any).inventoryItem.create({

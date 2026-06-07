@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendReservationStatusEmail } from '@/lib/email';
+import { authorize } from '@/lib/authorize';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'RECEPTION']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const siteId = searchParams.get('siteId') || 'azaguie';
@@ -40,6 +44,9 @@ export async function GET(req: Request) {
 
 
 export async function PATCH(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'RECEPTION']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const { id, status } = body;

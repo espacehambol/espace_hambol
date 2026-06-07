@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const agents = await prisma.user.findMany({
       where: {
@@ -13,7 +17,10 @@ export async function GET() {
         email: true,
         role: true,
         staffProfile: {
-          select: { position: true }
+          select: { 
+            position: true,
+            site: { select: { name: true } }
+          }
         }
       },
       orderBy: { name: 'asc' }
@@ -26,22 +33,33 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
-    // Get the first site to attach to
-    const site = await prisma.site.findFirst();
-    if (!site) return NextResponse.json({ error: 'Aucun site configuré.' }, { status: 404 });
+    const { name, email, position, siteId } = body;
+
+    // Use selected siteId or find first
+    let selectedSiteId = siteId;
+    if (!selectedSiteId) {
+      const site = await prisma.site.findFirst();
+      if (!site) return NextResponse.json({ error: 'Aucun site configuré.' }, { status: 404 });
+      selectedSiteId = site.id;
+    }
+
+    const userRole = position === 'ADMIN' ? 'ADMIN' : 'STAFF';
 
     const user = await prisma.user.create({
       data: {
-        name: body.name,
-        email: body.email,
+        name: name,
+        email: email,
         password: 'hambol2025',
-        role: 'STAFF',
+        role: userRole,
         staffProfile: {
           create: {
-            position: body.position || 'Agent',
-            siteId: site.id,
+            position: position || 'STAFF',
+            siteId: selectedSiteId,
           }
         }
       },

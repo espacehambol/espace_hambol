@@ -1,28 +1,54 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 // GET financial summary + recent transactions
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = authorize(request, ['ADMIN']);
+  if (!auth.authorized) return auth.response;
+
   try {
+    const { searchParams } = new URL(request.url);
+    const siteId = searchParams.get('siteId');
+
+    const filter: any = {};
+    if (siteId && siteId !== 'global') {
+      filter.siteId = siteId;
+    } else if (siteId === 'global') {
+      filter.siteId = null;
+    }
+
     const transactions = await prisma.transaction.findMany({
+      where: filter,
       include: { user: { select: { name: true } } },
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: 30,
     });
 
     const totalRevenue = await prisma.transaction.aggregate({
       _sum: { amount: true },
-      where: { type: 'INVOICE', status: 'PAID' },
+      where: { 
+        type: 'INVOICE', 
+        status: 'PAID',
+        ...filter
+      },
     });
 
     const totalExpenses = await prisma.transaction.aggregate({
       _sum: { amount: true },
-      where: { type: 'PAYMENT', status: 'PAID' },
+      where: { 
+        type: 'PAYMENT', 
+        status: 'PAID',
+        ...filter
+      },
     });
 
     const pendingAmount = await prisma.transaction.aggregate({
       _sum: { amount: true },
-      where: { status: 'PENDING' },
+      where: { 
+        status: 'PENDING',
+        ...filter
+      },
     });
 
     return NextResponse.json({
@@ -37,6 +63,7 @@ export async function GET() {
         amount: t.amount,
         type: t.type,
         status: t.status,
+        category: (t as any).category || 'AUTRE',
         description: t.description || 'Transaction',
         clientName: t.user?.name || 'Anonyme',
         date: t.createdAt,
@@ -50,6 +77,9 @@ export async function GET() {
 
 // POST create a new transaction
 export async function POST(request: Request) {
+  const auth = authorize(request, ['ADMIN']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     // Use the admin user ID as a placeholder
@@ -63,6 +93,8 @@ export async function POST(request: Request) {
         status: 'PAID',
         description: body.description,
         userId: admin.id,
+        siteId: body.siteId === 'global' ? null : (body.siteId || null),
+        category: body.category || 'AUTRE',
       },
     });
     return NextResponse.json({ transaction }, { status: 201 });

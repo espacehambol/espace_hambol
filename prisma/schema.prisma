@@ -17,6 +17,7 @@ model Site {
   staff     Staff[]
   inventory InventoryItem[]
   lostItems LostItem[]
+  transactions Transaction[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   dishes    Dish[]
@@ -120,10 +121,13 @@ model Transaction {
   type        String   // INVOICE, PAYMENT, REFUND
   status      String   @default("PENDING") // PENDING, PAID, CANCELLED
   description String?
+  category    String   @default("AUTRE") // HEBERGEMENT, RESTAURANT, BAR, SPA, LOISIRS, AUTRE
   user        User     @relation(fields: [userId], references: [id])
   userId      String
   reservation Reservation? @relation(fields: [reservationId], references: [id])
   reservationId String?
+  site        Site?    @relation(fields: [siteId], references: [id])
+  siteId      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

@@ -8,7 +8,10 @@ interface StaffMember {
   name: string;
   email: string;
   role: string;
-  staffProfile: { position: string } | null;
+  staffProfile: { 
+    position: string;
+    site: { name: string } | null;
+  } | null;
 }
 
 export default function HRPage() {
@@ -16,7 +19,7 @@ export default function HRPage() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', position: '' });
+  const [form, setForm] = useState({ name: '', email: '', position: 'RECEPTION', siteId: 'azaguie' });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchStaff = async () => {
@@ -44,7 +47,7 @@ export default function HRPage() {
       });
       if (res.ok) {
         setIsModalOpen(false);
-        setForm({ name: '', email: '', position: '' });
+        setForm({ name: '', email: '', position: 'RECEPTION', siteId: 'azaguie' });
         fetchStaff();
       }
     } catch (e) {
@@ -52,6 +55,16 @@ export default function HRPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const POSITION_LABELS: Record<string, string> = {
+    SUPER_ADMIN: 'Super Administrateur',
+    ADMIN: 'Direction',
+    MANAGER: 'Manager',
+    RECEPTION: 'Réception',
+    CHEF_CUISINIER: 'Chef Cuisinier',
+    HOUSEKEEPING: 'Gouvernance',
+    STAFF: 'Agent',
   };
 
   return (
@@ -104,12 +117,13 @@ export default function HRPage() {
                 <th className="px-10 py-5">Employé</th>
                 <th className="px-10 py-5">Poste</th>
                 <th className="px-10 py-5">Rôle</th>
+                <th className="px-10 py-5">Site</th>
                 <th className="px-10 py-5">Email</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {staff.length === 0 ? (
-                <tr><td colSpan={4} className="px-10 py-16 text-center text-gray-400">Aucun employé enregistré.</td></tr>
+                <tr><td colSpan={5} className="px-10 py-16 text-center text-gray-400">Aucun employé enregistré.</td></tr>
               ) : staff.map(member => (
                 <tr key={member.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-10 py-6">
@@ -120,12 +134,15 @@ export default function HRPage() {
                       <span className="font-bold text-primary">{member.name || 'N/A'}</span>
                     </div>
                   </td>
-                  <td className="px-10 py-6 text-gray-500">{member.staffProfile?.position || '—'}</td>
+                  <td className="px-10 py-6 text-gray-500">
+                    {POSITION_LABELS[member.staffProfile?.position || ''] || member.staffProfile?.position || '—'}
+                  </td>
                   <td className="px-10 py-6">
                     <span className={`text-[10px] font-bold px-2 py-1 rounded ${member.role === 'ADMIN' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
                       {member.role}
                     </span>
                   </td>
+                  <td className="px-10 py-6 text-gray-500">{member.staffProfile?.site?.name || '—'}</td>
                   <td className="px-10 py-6 text-gray-400 text-xs">{member.email}</td>
                 </tr>
               ))}
@@ -150,8 +167,22 @@ export default function HRPage() {
                 <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="Ex: k.konan@hambol.com" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Poste</label>
-                <input required value={form.position} onChange={e => setForm({...form, position: e.target.value})} placeholder="Ex: Réceptionniste" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none" />
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Poste (Niveau d'Accès)</label>
+                <select required value={form.position} onChange={e => setForm({...form, position: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none">
+                  <option value="RECEPTION">Réception</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="CHEF_CUISINIER">Chef Cuisinier</option>
+                  <option value="HOUSEKEEPING">Gouvernance</option>
+                  <option value="ADMIN">Direction (ADMIN)</option>
+                  <option value="STAFF">Agent / Staff de base</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Site de Rattachement</label>
+                <select required value={form.siteId} onChange={e => setForm({...form, siteId: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none">
+                  <option value="azaguie">🌿 Azaguié</option>
+                  <option value="yopougon">🏙️ Yopougon</option>
+                </select>
               </div>
               <button type="submit" disabled={submitting} className="w-full bg-primary text-white font-bold py-4 rounded-xl mt-4 hover:bg-primary-dk transition-all disabled:opacity-60">
                 {submitting ? 'Enregistrement...' : "Enregistrer l'Employé"}

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     // Fetch checked-in/active reservations
     const reservations = await prisma.reservation.findMany({
@@ -32,6 +36,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const { reservationId, clientId, amount, itemsDescription } = await req.json();
 
@@ -40,9 +47,16 @@ export async function POST(req: Request) {
     }
 
     // Start a transaction:
-    // 1. Create a POS Invoice Transaction associated with the Reservation
-    // 2. Increment Reservation total price
+    // 1. Fetch reservation room siteId
+    // 2. Create a POS Invoice Transaction associated with the Reservation
+    // 3. Increment Reservation total price
     const result = await prisma.$transaction(async (tx) => {
+      const reservationData = await tx.reservation.findUnique({
+        where: { id: reservationId },
+        include: { room: true }
+      });
+      if (!reservationData) throw new Error('Reservation not found');
+
       const transaction = await tx.transaction.create({
         data: {
           amount: parseFloat(amount.toString()),
@@ -50,7 +64,9 @@ export async function POST(req: Request) {
           status: 'PENDING', // Will be paid on check-out
           description: `Restauration POS - Imputation Chambre : ${itemsDescription || 'Consommation Restaurant'}`,
           userId: clientId,
-          reservationId: reservationId
+          reservationId: reservationId,
+          siteId: reservationData.room.siteId,
+          category: 'RESTAURANT'
         }
       });
 

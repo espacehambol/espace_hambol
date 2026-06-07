@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 export async function GET(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   const { searchParams } = new URL(request.url);
   const siteId = searchParams.get('siteId');
 
@@ -26,6 +30,9 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const { roomId, status } = await request.json();
 

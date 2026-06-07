@@ -8,6 +8,7 @@ interface Transaction {
   amount: number;
   type: string;
   status: string;
+  category?: string;
   description: string;
   clientName: string;
   date: string;
@@ -26,15 +27,22 @@ export default function FinancePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ type: 'Entrée (Revenu)', amount: '', description: '' });
+  const [form, setForm] = useState({ 
+    type: 'Entrée (Revenu)', 
+    amount: '', 
+    description: '',
+    siteScope: 'site', // 'site' | 'global'
+    category: 'AUTRE'
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchData = async () => {
     try {
-      const res = await fetch('/api/admin/finance');
+      const siteMapping: Record<string, string> = { 'Azaguié': 'azaguie', 'Yopougon': 'yopougon' };
+      const siteId = siteMapping[currentSite] || 'azaguie';
+      const res = await fetch(`/api/admin/finance?siteId=${siteId}`);
       const data = await res.json();
       
-      // Ensure metrics always has the required properties to avoid .toLocaleString() crash
       setMetrics({
         revenue: data?.metrics?.revenue ?? 0,
         expenses: data?.metrics?.expenses ?? 0,
@@ -50,20 +58,31 @@ export default function FinancePage() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [currentSite]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const siteMapping: Record<string, string> = { 'Azaguié': 'azaguie', 'Yopougon': 'yopougon' };
+      const activeSiteId = siteMapping[currentSite] || 'azaguie';
+      
+      const submitData = {
+        type: form.type,
+        amount: form.amount,
+        description: form.description,
+        category: form.category,
+        siteId: form.siteScope === 'global' ? 'global' : activeSiteId
+      };
+
       const res = await fetch('/api/admin/finance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(submitData),
       });
       if (res.ok) {
         setIsModalOpen(false);
-        setForm({ type: 'Entrée (Revenu)', amount: '', description: '' });
+        setForm({ type: 'Entrée (Revenu)', amount: '', description: '', siteScope: 'site', category: 'AUTRE' });
         fetchData();
       }
     } catch (e) {
@@ -116,12 +135,12 @@ export default function FinancePage() {
           {/* Transactions */}
           <div className="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-8 border-b border-gray-50">
-              <h3 className="text-xl font-bold text-primary">Journal des Transactions</h3>
+              <h3 className="text-xl font-bold text-primary">Journal des Transactions ({currentSite})</h3>
             </div>
             {transactions.length === 0 ? (
               <div className="py-16 text-center text-gray-400">
                 <p className="text-4xl mb-4">📊</p>
-                <p className="font-bold">Aucune transaction enregistrée.</p>
+                <p className="font-bold">Aucune transaction enregistrée pour ce site.</p>
                 <p className="text-sm">Utilisez &quot;+ Nouvelle Saisie&quot; pour commencer.</p>
               </div>
             ) : (
@@ -130,6 +149,7 @@ export default function FinancePage() {
                   <tr>
                     <th className="px-10 py-5">Description</th>
                     <th className="px-10 py-5">Type</th>
+                    <th className="px-10 py-5">Catégorie</th>
                     <th className="px-10 py-5">Montant</th>
                     <th className="px-10 py-5">Statut</th>
                     <th className="px-10 py-5">Date</th>
@@ -140,6 +160,7 @@ export default function FinancePage() {
                     <tr key={t.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-10 py-6 font-bold text-primary">{t.description}</td>
                       <td className="px-10 py-6 text-gray-500 text-xs">{t.type}</td>
+                      <td className="px-10 py-6 text-gray-500 text-xs font-semibold">{t.category || 'AUTRE'}</td>
                       <td className="px-10 py-6">
                         <span className={`font-bold text-sm ${t.type === 'INVOICE' ? 'text-green-600' : 'text-red-500'}`}>
                           {t.type === 'INVOICE' ? '+' : '-'}{t.amount.toLocaleString()} FCFA
@@ -172,6 +193,24 @@ export default function FinancePage() {
                 <select title="Type" value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none">
                   <option>Entrée (Revenu)</option>
                   <option>Sortie (Dépense)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Affectation de Site</label>
+                <select value={form.siteScope} onChange={e => setForm({...form, siteScope: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none">
+                  <option value="site">Ce site uniquement ({currentSite})</option>
+                  <option value="global">Global (Multi-sites / Aucun)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Catégorie de charge</label>
+                <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent outline-none">
+                  <option value="HEBERGEMENT">Hébergement</option>
+                  <option value="RESTAURANT">Restaurant</option>
+                  <option value="BAR">Bar / Boissons</option>
+                  <option value="SPA">Spa & Bien-être</option>
+                  <option value="LOISIRS">Loisirs / Événements</option>
+                  <option value="AUTRE">Autre / Dépense Générale</option>
                 </select>
               </div>
               <div>

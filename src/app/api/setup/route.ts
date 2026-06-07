@@ -99,12 +99,15 @@ export async function GET(request: NextRequest) {
         "type" TEXT NOT NULL,
         "status" TEXT NOT NULL DEFAULT 'PENDING',
         "description" TEXT,
+        "category" TEXT NOT NULL DEFAULT 'AUTRE',
         "userId" TEXT NOT NULL,
         "reservationId" TEXT,
+        "siteId" TEXT,
         "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE,
-        FOREIGN KEY ("reservationId") REFERENCES "Reservation"("id") ON DELETE CASCADE
+        FOREIGN KEY ("reservationId") REFERENCES "Reservation"("id") ON DELETE CASCADE,
+        FOREIGN KEY ("siteId") REFERENCES "Site"("id") ON DELETE SET NULL
       )
     `);
 
@@ -288,6 +291,20 @@ export async function GET(request: NextRequest) {
       console.log('[Setup] Added status and site columns to Review table');
     } catch (e) {
       // Ignorer si les colonnes existent déjà
+    }
+
+    // Migrate existing Transaction table if it exists
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "Transaction" ADD COLUMN "category" TEXT NOT NULL DEFAULT 'AUTRE'`);
+      console.log('[Setup] Added category column to Transaction table');
+    } catch (e) {
+      // Ignorer si la colonne existe déjà
+    }
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "Transaction" ADD COLUMN "siteId" TEXT REFERENCES "Site"("id") ON DELETE SET NULL`);
+      console.log('[Setup] Added siteId column to Transaction table');
+    } catch (e) {
+      // Ignorer si la colonne existe déjà
     }
 
     // ─── SEED DATA ───────────────────────────────────────────────────────────
