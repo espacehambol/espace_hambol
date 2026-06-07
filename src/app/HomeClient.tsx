@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSite } from "@/context/SiteContext";
 import BookingWidget from "@/components/BookingWidget";
+import SpecialOffers from "@/components/SpecialOffers";
+import ReviewsCarousel from "@/components/ReviewsCarousel";
 
 function Slideshow({ images }: { images: string[] }) {
   const [index, setIndex] = useState(0);
@@ -748,6 +750,8 @@ export default function HomeClient() {
         </div>
       </section>
 
+      <SpecialOffers />
+
       {/* Domain: Gastronomie */}
       <section id="gastronomie" className="py-32 bg-[#1A1208] text-[#F5EDE0] overflow-hidden reveal">
         <div className="max-w-7xl mx-auto px-6">
@@ -1000,6 +1004,9 @@ export default function HomeClient() {
             <p className="font-body text-accent font-bold tracking-widest uppercase text-xs">— La Direction</p>
           </div>
       </section>
+
+      {/* Reviews Carousel Section */}
+      <ReviewsCarousel />
 
       {/* Final CTA / Newsletter */}
       <NewsletterSection />
