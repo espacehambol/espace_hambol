@@ -4,18 +4,12 @@ import { useState, useEffect } from 'react';
 import { useSite } from '@/context/SiteContext';
 
 const REVIEWS = [
+  // AVIS AZAGUIÉ
   {
     id: 1,
     name: "Marc K.",
     site: "Azaguié",
     text: "Un cadre exceptionnel et apaisant. La piscine est magnifique et le personnel aux petits soins. Idéal pour s'échapper du bruit d'Abidjan le week-end.",
-    rating: 5
-  },
-  {
-    id: 2,
-    name: "Awa D.",
-    site: "Yopougon",
-    text: "Le Kédjénou de poulet était incroyablement bon ! La chambre VIP est très propre avec une belle décoration. Je reviendrai sans hésiter.",
     rating: 5
   },
   {
@@ -26,17 +20,89 @@ const REVIEWS = [
     rating: 5
   },
   {
-    id: 4,
-    name: "Sarah M.",
-    site: "Yopougon",
-    text: "Très bon hôtel en plein Yopougon. Le bar lounge au 4ème étage offre une vue superbe et les cocktails sont délicieux. Service très professionnel.",
-    rating: 4
-  },
-  {
     id: 5,
     name: "Didier Z.",
     site: "Azaguié",
     text: "Les bungalows sont spacieux et se fondent parfaitement dans la nature. Le poisson braisé du restaurant est probablement le meilleur de la région.",
+    rating: 5
+  },
+  {
+    id: 6,
+    name: "Aline Y.",
+    site: "Azaguié",
+    text: "Le dépaysement total ! À peine arrivée, on se sent apaisée par la verdure et les bambous. Les enfants ont adoré la grande piscine.",
+    rating: 5
+  },
+  {
+    id: 7,
+    name: "Cédric B.",
+    site: "Azaguié",
+    text: "L'espace est immense, parfait pour une retraite ou un séminaire d'entreprise. L'équipe est discrète et très professionnelle.",
+    rating: 5
+  },
+  {
+    id: 8,
+    name: "Nina F.",
+    site: "Azaguié",
+    text: "Séjour reposant dans un bungalow propre et charmant. Mention spéciale pour la carpe braisée accompagnée d'alloco, un pur régal.",
+    rating: 4
+  },
+  {
+    id: 9,
+    name: "Koffi M.",
+    site: "Azaguié",
+    text: "C'est l'endroit parfait pour fuir le stress d'Abidjan. L'air est pur, on y dort tellement bien. Je recommande vivement pour les couples.",
+    rating: 5
+  },
+
+  // AVIS YOPOUGON
+  {
+    id: 2,
+    name: "Awa D.",
+    site: "Yopougon",
+    text: "Le Kédjénou de poulet était incroyablement bon ! La chambre VIP est très propre avec une belle décoration. Je reviendrai sans hésiter.",
+    rating: 5
+  },
+  {
+    id: 4,
+    name: "Sarah M.",
+    site: "Yopougon",
+    text: "Très bon hôtel en plein Yopougon. Le bar lounge offre une ambiance feutrée et les cocktails sont délicieux. Service très professionnel.",
+    rating: 4
+  },
+  {
+    id: 10,
+    name: "Eric S.",
+    site: "Yopougon",
+    text: "Un endroit très discret et propre. Le personnel à l'accueil est souriant et le room-service est super rapide. Idéal pour se reposer.",
+    rating: 5
+  },
+  {
+    id: 11,
+    name: "Patricia L.",
+    site: "Yopougon",
+    text: "Le bar VIP est génial, la musique n'est pas trop forte et on s'entend parler. L'endroit parfait pour un afterwork entre amis ou collègues.",
+    rating: 5
+  },
+  {
+    id: 12,
+    name: "Stéphane O.",
+    site: "Yopougon",
+    text: "J'ai passé un très bon séjour. Le service de lavage auto pendant que je prenais mon repas est un très gros plus. Bravo à l'équipe !",
+    rating: 5
+  },
+  {
+    id: 13,
+    name: "Bintou K.",
+    site: "Yopougon",
+    text: "Chambre spacieuse et lit extrêmement confortable. La climatisation fonctionne parfaitement. Une vraie suite VIP.",
+    rating: 5
+  },
+  {
+    id: 14,
+    name: "Alexandre G.",
+    site: "Yopougon",
+    text: "Très pratique car situé en plein Yopougon Ananeraie, mais avec un calme impressionnant une fois à l'intérieur. Je suis un client fidèle.",
     rating: 5
   }
 ];
