@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 // POST /api/admin/menu/components — Ajouter un composant à un plat
 export async function POST(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     if (!body.dishId || !body.name || !body.type) {
@@ -25,6 +29,9 @@ export async function POST(request: Request) {
 
 // DELETE /api/admin/menu/components?id=xxx — Supprimer un composant
 export async function DELETE(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'ID requis' }, { status: 400 });

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'RECEPTION']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const today = new Date();
     

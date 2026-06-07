@@ -5,7 +5,7 @@ import { authorize } from '@/lib/authorize';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
-  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   try {
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   try {
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   try {
@@ -76,7 +76,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  const auth = authorize(req, ['ADMIN', 'MANAGER', 'HOUSEKEEPING', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   try {

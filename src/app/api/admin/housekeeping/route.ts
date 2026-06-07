@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { authorize } from '@/lib/authorize';
 
 export async function GET(request: Request) {
-  const auth = authorize(request, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'HOUSEKEEPING', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   const { searchParams } = new URL(request.url);
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const auth = authorize(request, ['ADMIN', 'MANAGER', 'HOUSEKEEPING']);
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'HOUSEKEEPING', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   try {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -19,6 +20,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     const dish = await prisma.dish.create({
@@ -41,6 +45,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     if (!body.id) return NextResponse.json({ error: 'ID requis' }, { status: 400 });
@@ -65,6 +72,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'CHEF_CUISINIER']);
+  if (!auth.authorized) return auth.response;
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 

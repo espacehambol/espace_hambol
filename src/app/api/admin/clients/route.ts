@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { authorize } from '@/lib/authorize';
 
 // GET all clients from the database
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'RECEPTION']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const clients = await prisma.user.findMany({
       where: { role: 'CLIENT' },
@@ -32,6 +36,9 @@ export async function GET() {
 
 // POST create a new client
 export async function POST(request: Request) {
+  const auth = authorize(request, ['ADMIN', 'MANAGER', 'RECEPTION']);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     const client = await prisma.user.create({

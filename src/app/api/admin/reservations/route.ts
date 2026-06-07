@@ -26,6 +26,7 @@ export async function GET(req: Request) {
             }
           },
           client: true,
+          kycData: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -42,24 +43,33 @@ export async function GET(req: Request) {
   }
 }
 
-
 export async function PATCH(req: Request) {
   const auth = authorize(req, ['ADMIN', 'MANAGER', 'RECEPTION']);
   if (!auth.authorized) return auth.response;
 
   try {
     const body = await req.json();
-    const { id, status } = body;
+    const { id, status, checkInStatus } = body;
+
+    const updateData: any = {};
+    if (status) updateData.status = status;
+    if (checkInStatus) updateData.checkInStatus = checkInStatus;
 
     const reservation = await prisma.reservation.update({
       where: { id },
-      data: { status },
+      data: updateData,
     });
 
-    if (status === 'COMPLETED') {
+    // Handle room status updates automatically
+    if (status === 'COMPLETED' || checkInStatus === 'CHECKED_OUT') {
       await prisma.room.update({
         where: { id: reservation.roomId },
         data: { status: 'DIRTY' },
+      });
+    } else if (checkInStatus === 'CHECKED_IN') {
+      await prisma.room.update({
+        where: { id: reservation.roomId },
+        data: { status: 'OCCUPIED' },
       });
     }
 
