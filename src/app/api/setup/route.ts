@@ -99,9 +99,11 @@ export async function GET(request: NextRequest) {
         "status" TEXT NOT NULL DEFAULT 'PENDING',
         "description" TEXT,
         "userId" TEXT NOT NULL,
+        "reservationId" TEXT,
         "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
+        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE,
+        FOREIGN KEY ("reservationId") REFERENCES "Reservation"("id") ON DELETE CASCADE
       )
     `);
 
@@ -127,6 +129,8 @@ export async function GET(request: NextRequest) {
         "status" TEXT NOT NULL DEFAULT 'PENDING',
         "checkInStatus" TEXT NOT NULL DEFAULT 'NOT_STARTED',
         "totalPrice" REAL NOT NULL DEFAULT 0,
+        "paymentIntentId" TEXT,
+        "paymentStatus" TEXT NOT NULL DEFAULT 'UNPAID',
         "roomId" TEXT NOT NULL,
         "clientId" TEXT NOT NULL,
         "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
