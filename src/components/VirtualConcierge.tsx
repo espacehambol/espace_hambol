@@ -33,6 +33,7 @@ export default function VirtualConcierge() {
       text: "Bonjour et bienvenue à l'espace Hambole ! Je suis votre concierge virtuel. Comment puis-je rendre votre séjour exceptionnel ?",
       options: [
         { label: "🏨 Réserver une Chambre", action: () => handleAction("🏨 Réserver une Chambre", "RESERVER") },
+        { label: "💰 Tarifs des Séjours", action: () => handleAction("💰 Tarifs des Séjours", "TARIFS") },
         { label: "🍽️ Voir la Gastronomie", action: () => handleAction("🍽️ Voir la Gastronomie", "GASTRONOMIE") },
         { label: "📍 Où êtes-vous situés ?", action: () => handleAction("📍 Où êtes-vous situés ?", "LOCATION") },
         { label: "🛎️ Contacter la Réception", action: () => handleAction("🛎️ Contacter la Réception", "CONTACT") }
@@ -60,6 +61,17 @@ export default function VirtualConcierge() {
             router.push('/reservations');
             setIsOpen(false);
           }, 1500);
+          break;
+        case "TARIFS":
+          botResponse = {
+            id: Date.now().toString(),
+            type: 'bot',
+            text: "Voici nos différents tarifs pour les chambres VIP :\n- Passage (1h30) : 10.000 FCFA\n- Long repos (10h) : 15.000 FCFA\n- Nuitée (22h-12h) : 15.000 FCFA\n- Séjour 24h (Standard) : 20.000 FCFA\n- Séjour 24h (Complet avec repas) : 25.000 FCFA",
+            options: [
+              { label: "🏨 Passer à la réservation", action: () => handleAction("🏨 Réserver une Chambre", "RESERVER") },
+              { label: "🔙 Retour au menu principal", action: () => resetToMain() }
+            ]
+          };
           break;
         case "GASTRONOMIE":
           botResponse = {
@@ -135,6 +147,7 @@ export default function VirtualConcierge() {
         text: "Comment puis-je vous aider d'autre ?",
         options: [
           { label: "🏨 Réserver une Chambre", action: () => handleAction("🏨 Réserver une Chambre", "RESERVER") },
+          { label: "💰 Tarifs des Séjours", action: () => handleAction("💰 Tarifs des Séjours", "TARIFS") },
           { label: "🍽️ Voir la Gastronomie", action: () => handleAction("🍽️ Voir la Gastronomie", "GASTRONOMIE") },
           { label: "📍 Où êtes-vous situés ?", action: () => handleAction("📍 Où êtes-vous situés ?", "LOCATION") },
           { label: "🛎️ Contacter la Réception", action: () => handleAction("🛎️ Contacter la Réception", "CONTACT") }
@@ -182,7 +195,7 @@ export default function VirtualConcierge() {
         <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-4">
           {messages.map((msg, idx) => (
             <div key={msg.id || idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${msg.type === 'user' ? 'bg-[#2E7D1E] text-white rounded-br-sm' : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'}`}>
+              <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm whitespace-pre-wrap ${msg.type === 'user' ? 'bg-[#2E7D1E] text-white rounded-br-sm' : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'}`}>
                 <div className="text-sm">{msg.text}</div>
                 
                 {/* Options (boutons) */}
