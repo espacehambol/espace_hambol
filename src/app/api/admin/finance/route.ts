@@ -32,7 +32,7 @@ export async function GET() {
         netProfit: (totalRevenue._sum.amount || 0) - (totalExpenses._sum.amount || 0),
         pending: pendingAmount._sum.amount || 0,
       },
-      transactions: transactions.map((t: any) => ({
+      transactions: transactions.map(t => ({
         id: t.id,
         amount: t.amount,
         type: t.type,

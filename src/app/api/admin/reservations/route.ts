@@ -49,13 +49,6 @@ export async function PATCH(req: Request) {
       data: { status },
     });
 
-    if (status === 'COMPLETED') {
-      await prisma.room.update({
-        where: { id: reservation.roomId },
-        data: { status: 'DIRTY' },
-      });
-    }
-
     if (status === 'CONFIRMED' || status === 'CANCELLED') {
       sendReservationStatusEmail(reservation.id).catch((err) => {
         console.error('Failed to send reservation status email:', err);

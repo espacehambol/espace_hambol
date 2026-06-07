@@ -216,15 +216,3 @@ model SystemSetting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-model LostItem {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  location    String   // e.g. Room number or "Lobby"
-  status      String   @default("FOUND") // FOUND, CLAIMED, SHIPPED
-  siteId      String
-  site        Site     @relation(fields: [siteId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}

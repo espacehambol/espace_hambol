@@ -14,7 +14,7 @@ async function check() {
 
     if (siteCount > 0) {
         const sites = await prisma.site.findMany();
-        console.log('Sites:', sites.map((s: any) => s.name));
+        console.log('Sites:', sites.map(s => s.name));
     }
   } catch (e) {
     console.error('Database check failed:', e);

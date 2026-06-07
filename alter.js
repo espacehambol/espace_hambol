@@ -1,24 +1,13 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('./node_modules/@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "LostItem" (
-        "id" TEXT NOT NULL PRIMARY KEY,
-        "name" TEXT NOT NULL,
-        "description" TEXT,
-        "location" TEXT NOT NULL,
-        "status" TEXT NOT NULL DEFAULT 'FOUND',
-        "siteId" TEXT NOT NULL,
-        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" DATETIME NOT NULL,
-        CONSTRAINT "LostItem_siteId_fkey" FOREIGN KEY ("siteId") REFERENCES "Site" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
-      )
-    `);
-    console.log('LostItem table created successfully');
+    await prisma.$executeRawUnsafe(`ALTER TABLE "Review" ADD COLUMN "status" TEXT NOT NULL DEFAULT 'PENDING'`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "Review" ADD COLUMN "site" TEXT NOT NULL DEFAULT 'Yopougon'`);
+    console.log('Columns added successfully');
   } catch (e) {
-    console.log('Error creating table:', e.message);
+    console.log('Error adding columns:', e.message);
   } finally {
     await prisma.$disconnect();
   }
