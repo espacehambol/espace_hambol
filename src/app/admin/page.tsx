@@ -86,7 +86,7 @@ export default function AdminDashboard() {
       <div className="space-y-10">
         <header className="flex justify-between items-end">
           <div>
-            <h1 className="text-4xl font-title font-bold text-primary">Tableau de Bord</h1>
+            <h1 className="text-4xl font-title font-bold text-primary">Analytique & Stats</h1>
             <p className="text-gray-400 text-sm mt-2">Vue d&apos;ensemble de l&apos;Espace Hambol — {currentSite}</p>
           </div>
         </header>
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
     <div className="space-y-10">
       <header className="flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-title font-bold text-primary">Tableau de Bord</h1>
+          <h1 className="text-4xl font-title font-bold text-primary">Analytique & Stats</h1>
           <p className="text-gray-400 text-sm mt-2">Vue d&apos;ensemble de l&apos;Espace Hambol — {currentSite}</p>
         </div>
         <div className="flex gap-4">

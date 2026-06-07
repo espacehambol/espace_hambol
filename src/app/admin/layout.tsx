@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 
 // Define which menu items each position can see
 const ALL_MENU_ITEMS = [
-  { name: 'Tableau de Bord', path: '/admin', icon: '📊', roles: ['ADMIN', 'MANAGER', 'RECEPTION', 'CHEF_CUISINIER', 'HOUSEKEEPING', 'STAFF'] },
+  { name: 'Analytique & Stats', path: '/admin', icon: '📊', roles: ['ADMIN', 'MANAGER', 'RECEPTION', 'CHEF_CUISINIER', 'HOUSEKEEPING', 'STAFF'] },
   { name: 'Réservations', path: '/admin/reservations', icon: '📅', roles: ['ADMIN', 'MANAGER', 'RECEPTION'] },
   { name: 'Front Desk', path: '/admin/front-desk', icon: '🛎️', roles: ['ADMIN', 'MANAGER', 'RECEPTION'] },
   { name: 'Gouvernance', path: '/admin/housekeeping', icon: '🧹', roles: ['ADMIN', 'MANAGER', 'HOUSEKEEPING'] },
@@ -16,7 +16,7 @@ const ALL_MENU_ITEMS = [
   { name: 'Événements', path: '/admin/events', icon: '🎪', roles: ['ADMIN', 'MANAGER'] },
   { name: 'Stock / Inventaire', path: '/admin/inventory', icon: '📦', roles: ['ADMIN', 'MANAGER', 'CHEF_CUISINIER'] },
   { name: 'Comptabilité', path: '/admin/finance', icon: '💰', roles: ['ADMIN'] },
-  { name: 'Clients (CRM)', path: '/admin/clients', icon: '🤝', roles: ['ADMIN', 'MANAGER', 'RECEPTION'] },
+  { name: 'CRM & Marketing', path: '/admin/clients', icon: '🤝', roles: ['ADMIN', 'MANAGER', 'RECEPTION'] },
   { name: 'Ressources Humaines', path: '/admin/hr', icon: '👥', roles: ['ADMIN', 'MANAGER'] },
   { name: 'Webmail', path: '/admin/webmail', icon: '📧', roles: ['ADMIN', 'MANAGER'] },
   { name: 'Sécurité & Accès', path: '/admin/security', icon: '🔐', roles: ['ADMIN'] },
