@@ -19,6 +19,8 @@ export default function CRMPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ name: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [marketingLogs, setMarketingLogs] = useState<any[]>([]);
+  const [simulating, setSimulating] = useState(false);
 
   const fetchClients = async () => {
     try {
@@ -60,6 +62,24 @@ export default function CRMPage() {
     if (tier === 'GOLD') return 'bg-amber-100 text-amber-700';
     if (tier === 'SILVER') return 'bg-gray-200 text-gray-700';
     return 'bg-gray-100 text-gray-600';
+  };
+
+  const simulateMarketingAutomation = async () => {
+    setSimulating(true);
+    try {
+      const res = await fetch('/api/admin/crm/marketing');
+      const data = await res.json();
+      if (data.success) {
+        setMarketingLogs(data.logs || []);
+        if (data.logs.length === 0) {
+          alert("Aucun e-mail à envoyer aujourd'hui (Pas de check-in à J-2 ni de check-out à J+1).");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSimulating(false);
+    }
   };
 
   return (
@@ -141,6 +161,50 @@ export default function CRMPage() {
               ))}
             </tbody>
           </table>
+        )}
+      </div>
+
+      {/* Marketing Automation Section */}
+      <div className="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden p-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+          <div>
+            <h3 className="text-2xl font-title font-bold text-primary flex items-center gap-3">
+              <span className="text-3xl">🤖</span> Marketing Automatisé
+            </h3>
+            <p className="text-sm text-gray-500 mt-1 max-w-xl">
+              Le système vérifie chaque jour les réservations pour envoyer automatiquement un e-mail <strong>Pré-arrivée (J-2)</strong> pour de l'upsell et un e-mail <strong>Post-séjour (J+1)</strong> pour récolter des avis.
+            </p>
+          </div>
+          <button 
+            onClick={simulateMarketingAutomation} 
+            disabled={simulating}
+            className="bg-accent text-black font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
+          >
+            {simulating ? 'Vérification en cours...' : '▶ Simuler la Tâche Journalière'}
+          </button>
+        </div>
+
+        {marketingLogs.length > 0 && (
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Rapport d'exécution</h4>
+            {marketingLogs.map((log, idx) => (
+              <div key={idx} className="flex gap-4 items-start p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${log.type === 'PRE_ARRIVAL_UPSELL' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'}`}>
+                  {log.type === 'PRE_ARRIVAL_UPSELL' ? '📅' : '⭐'}
+                </div>
+                <div>
+                  <div className="flex gap-2 items-center mb-1">
+                    <span className="font-bold text-sm text-primary">{log.clientName}</span>
+                    <span className="text-xs text-gray-400">({log.clientEmail})</span>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${log.type === 'PRE_ARRIVAL_UPSELL' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                      {log.type === 'PRE_ARRIVAL_UPSELL' ? 'E-MAIL J-2 (UPSELL)' : 'E-MAIL J+1 (AVIS)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600">{log.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

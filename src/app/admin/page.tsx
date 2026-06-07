@@ -166,6 +166,10 @@ export default function AdminDashboard() {
               style={{ width: `${currentSiteStats?.occupancyRate || 0}%` }}
             />
           </div>
+          <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50 pt-2 mt-2">
+            <span title="Taux d'occupation prévisionnel (30 jours)">Prévisionnel (30J)</span>
+            <span className="text-primary">{currentSiteStats?.projectedOccupancy || 0}%</span>
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">

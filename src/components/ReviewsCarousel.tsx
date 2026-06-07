@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSite } from '@/context/SiteContext';
 
-const REVIEWS = [
+const DEFAULT_REVIEWS = [
   // AVIS AZAGUIÉ
   {
     id: 1,
@@ -110,9 +110,30 @@ const REVIEWS = [
 export default function ReviewsCarousel() {
   const { currentSite } = useSite();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [dbReviews, setDbReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch('/api/reviews');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            setDbReviews(data);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching reviews:', err);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  // Use DB reviews if available, otherwise fallback to defaults
+  const activeReviews = dbReviews.length > 0 ? [...dbReviews, ...DEFAULT_REVIEWS] : DEFAULT_REVIEWS;
 
   // Filtrer les avis en fonction du site sélectionné
-  const filteredReviews = REVIEWS.filter(review => review.site === currentSite);
+  const filteredReviews = activeReviews.filter(review => review.site === currentSite);
 
   // S'assurer que l'index courant est toujours valide après un changement de site
   useEffect(() => {

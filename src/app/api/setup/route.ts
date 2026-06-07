@@ -186,6 +186,8 @@ export async function GET(request: NextRequest) {
         "rating" INTEGER NOT NULL DEFAULT 5,
         "comment" TEXT,
         "category" TEXT,
+        "status" TEXT NOT NULL DEFAULT 'PENDING',
+        "site" TEXT NOT NULL DEFAULT 'Yopougon',
         "userId" TEXT NOT NULL,
         "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -260,6 +262,15 @@ export async function GET(request: NextRequest) {
         FOREIGN KEY ("dishId") REFERENCES "Dish"("id") ON DELETE CASCADE
       )
     `);
+
+    // Migrate existing Review table if it exists
+    try {
+      await prisma.$executeRawUnsafe(\`ALTER TABLE "Review" ADD COLUMN "status" TEXT NOT NULL DEFAULT 'PENDING'\`);
+      await prisma.$executeRawUnsafe(\`ALTER TABLE "Review" ADD COLUMN "site" TEXT NOT NULL DEFAULT 'Yopougon'\`);
+      console.log('[Setup] Added status and site columns to Review table');
+    } catch (e) {
+      // Ignorer si les colonnes existent déjà
+    }
 
     // ─── SEED DATA ───────────────────────────────────────────────────────────
 

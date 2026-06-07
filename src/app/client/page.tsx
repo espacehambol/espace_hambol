@@ -8,6 +8,31 @@ export default function ClientDashboard() {
   const { currentSite } = useSite();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSite, setReviewSite] = useState(currentSite);
+  const [reviewStatus, setReviewStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const submitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+    setReviewStatus('loading');
+    try {
+      const res = await fetch('/api/client/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: reviewRating, comment: reviewComment, site: reviewSite })
+      });
+      if (res.ok) {
+        setReviewStatus('success');
+        setReviewComment('');
+      } else {
+        setReviewStatus('error');
+      }
+    } catch {
+      setReviewStatus('error');
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -140,6 +165,84 @@ export default function ClientDashboard() {
               </div>
             ))}
          </div>
+      </section>
+
+      {/* Testimonials Submission Form */}
+      <section className="bg-white rounded-[3.5rem] p-12 border border-gray-100 shadow-sm relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row gap-12">
+          <div className="md:w-1/3">
+            <h3 className="text-3xl font-title font-bold text-primary mb-4">Votre avis compte</h3>
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              Aidez-nous à nous améliorer ou partagez votre expérience avec les futurs visiteurs de l'Espace Hambol. 
+              Votre témoignage sera visible dans notre Livre d'Or.
+            </p>
+          </div>
+          
+          <div className="md:w-2/3">
+            {reviewStatus === 'success' ? (
+              <div className="bg-green-50 border border-green-200 text-green-700 p-8 rounded-3xl flex flex-col items-center justify-center text-center animate-fade-in h-full">
+                <span className="text-4xl mb-4">✨</span>
+                <p className="font-bold text-lg mb-2">Merci pour votre témoignage !</p>
+                <p className="text-sm">Il a été soumis avec succès et sera publié après validation par notre équipe.</p>
+                <button onClick={() => setReviewStatus('idle')} className="mt-6 text-green-600 font-bold text-sm underline">Soumettre un autre avis</button>
+              </div>
+            ) : (
+              <form onSubmit={submitReview} className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="flex-1 space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Site concerné</label>
+                    <select 
+                      value={reviewSite} 
+                      onChange={(e) => setReviewSite(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent text-primary font-bold"
+                    >
+                      <option value="Azaguié">Hambol Azaguié</option>
+                      <option value="Yopougon">Hambol Yopougon</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Votre Note</label>
+                    <div className="flex gap-2 pt-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          className={`w-8 h-8 focus:outline-none transition-transform hover:scale-110 ${star <= reviewRating ? 'text-yellow-400' : 'text-gray-300'}`}
+                        >
+                          <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Commentaire</label>
+                  <textarea 
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Partagez les détails de votre expérience..."
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 min-h-[120px] focus:outline-none focus:ring-2 focus:ring-accent text-primary placeholder:text-gray-400 resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-red-500">{reviewStatus === 'error' && 'Une erreur est survenue.'}</p>
+                  <button 
+                    type="submit" 
+                    disabled={reviewStatus === 'loading' || !reviewComment.trim()}
+                    className="bg-primary text-white px-10 py-4 rounded-xl font-bold shadow-md hover:bg-primary-dk hover:shadow-xl transition-all disabled:opacity-50 disabled:hover:scale-100"
+                  >
+                    {reviewStatus === 'loading' ? 'Envoi...' : 'Soumettre mon avis'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
       </section>
     </div>
   );

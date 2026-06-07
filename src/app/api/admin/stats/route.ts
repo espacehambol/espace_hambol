@@ -24,11 +24,36 @@ export async function GET() {
       }
     });
 
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    const futureSites = await prisma.site.findMany({
+      include: {
+        rooms: {
+          include: {
+            reservations: {
+              where: {
+                status: 'CONFIRMED',
+                checkIn: { gte: new Date(), lte: thirtyDaysFromNow },
+              }
+            }
+          }
+        }
+      }
+    });
+
     const stats = sites.map(site => {
       const occupiedRooms = site.rooms.filter(room => room.status === 'OCCUPIED' || room.reservations.length > 0).length;
       const totalRooms = 11; // User requirement: 11 rooms per site
       const occupancyRate = (occupiedRooms / totalRooms) * 100;
       
+      const futureSite = futureSites.find(f => f.id === site.id);
+      const futureOccupied = futureSite?.rooms.filter(room => room.reservations.length > 0).length || 0;
+      // Projected occupancy based on current + future bookings within 30 days vs total capacity over 30 days is complex.
+      // Let's simplify: percentage of rooms booked at least once in the next 30 days, or just a simple mock logic for the KPI since ADR/RevPAR are also daily snapshots here.
+      // Let's use (currentOccupied + futureOccupied) / totalRooms as a simple metric, capped at 100.
+      const projectedOccupancy = Math.min(100, ((occupiedRooms + futureOccupied) / totalRooms) * 100);
+
       const revenue = site.rooms.reduce((acc, room) => acc + (room.reservations.reduce((rAcc, r) => rAcc + r.totalPrice, 0)), 0);
       const adr = occupiedRooms > 0 ? Math.round(revenue / occupiedRooms) : 0;
       const revpar = Math.round(revenue / totalRooms);
@@ -39,6 +64,7 @@ export async function GET() {
         occupiedRooms,
         totalRooms,
         occupancyRate: Math.round(occupancyRate),
+        projectedOccupancy: Math.round(projectedOccupancy),
         revenue,
         adr,
         revpar,
