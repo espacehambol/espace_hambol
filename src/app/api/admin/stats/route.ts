@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const sites = await prisma.site.findMany({
@@ -27,13 +29,19 @@ export async function GET() {
       const totalRooms = 11; // User requirement: 11 rooms per site
       const occupancyRate = (occupiedRooms / totalRooms) * 100;
       
+      const revenue = site.rooms.reduce((acc, room) => acc + (room.reservations.reduce((rAcc, r) => rAcc + r.totalPrice, 0)), 0);
+      const adr = occupiedRooms > 0 ? Math.round(revenue / occupiedRooms) : 0;
+      const revpar = Math.round(revenue / totalRooms);
+
       return {
         siteId: site.id,
         siteName: site.name,
         occupiedRooms,
         totalRooms,
         occupancyRate: Math.round(occupancyRate),
-        revenue: site.rooms.reduce((acc, room) => acc + (room.reservations.reduce((rAcc, r) => rAcc + r.totalPrice, 0)), 0),
+        revenue,
+        adr,
+        revpar,
         rooms: site.rooms.map(room => ({
           number: room.number,
           status: room.status,
@@ -41,8 +49,12 @@ export async function GET() {
       };
     });
 
-    const totalOccupancy = Math.round(stats.reduce((acc, s) => acc + s.occupancyRate, 0) / sites.length);
+    const totalOccupancy = Math.round(stats.reduce((acc, s) => acc + s.occupancyRate, 0) / sites.length) || 0;
     const totalRevenue = stats.reduce((acc, s) => acc + s.revenue, 0);
+    const totalRoomsCount = stats.reduce((acc, s) => acc + s.totalRooms, 0);
+    const totalOccupiedCount = stats.reduce((acc, s) => acc + s.occupiedRooms, 0);
+    const globalAdr = totalOccupiedCount > 0 ? Math.round(totalRevenue / totalOccupiedCount) : 0;
+    const globalRevpar = totalRoomsCount > 0 ? Math.round(totalRevenue / totalRoomsCount) : 0;
 
     const recentActivity = await prisma.reservation.findMany({
       take: 3,
@@ -66,6 +78,8 @@ export async function GET() {
       overall: {
         occupancy: totalOccupancy,
         revenue: totalRevenue,
+        adr: globalAdr,
+        revpar: globalRevpar,
         pendingReservations: await prisma.reservation.count({ where: { status: 'PENDING' } })
       },
       sites: stats,

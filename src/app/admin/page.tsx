@@ -8,6 +8,8 @@ interface Stats {
   overall: {
     occupancy: number;
     revenue: number;
+    adr: number;
+    revpar: number;
     pendingReservations: number;
   };
   sites: Array<{
@@ -17,6 +19,8 @@ interface Stats {
     totalRooms: number;
     occupancyRate: number;
     revenue: number;
+    adr: number;
+    revpar: number;
     rooms?: Array<{
       number: string;
       status: string;
@@ -146,15 +150,15 @@ export default function AdminDashboard() {
       </header>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
           <div className="flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
             <span>Occupation</span>
             <span className="text-accent">Live</span>
           </div>
-          <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-primary">{currentSiteStats?.occupancyRate || 0}%</span>
-            <span className="text-sm text-gray-400 mb-2">/ 11 chambres</span>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-primary">{currentSiteStats?.occupancyRate || 0}%</span>
+            <span className="text-xs text-gray-400 mb-1">/ 11 ch.</span>
           </div>
           <div className="w-full bg-sand h-2 rounded-full overflow-hidden">
             <div 
@@ -164,28 +168,43 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
           <div className="flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
             <span>Chiffre d&apos;Affaires</span>
             <span className="text-green-500">Mois</span>
           </div>
-          <div className="flex items-end gap-2 text-primary font-bold">
-            <span className="text-4xl">{(currentSiteStats?.revenue || 0).toLocaleString()}</span>
-            <span className="text-sm mb-1 uppercase">FCFA</span>
+          <div className="flex items-end gap-1 text-primary font-bold">
+            <span className="text-3xl">{(currentSiteStats?.revenue || 0).toLocaleString()}</span>
+            <span className="text-[10px] mb-1 uppercase">FCFA</span>
           </div>
-          <p className="text-[10px] text-gray-400">+12% par rapport au mois dernier</p>
+          <p className="text-[10px] text-gray-400">+12% vs mois dernier</p>
         </div>
 
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
           <div className="flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
-            <span>Réservations en attente</span>
+            <span title="Average Daily Rate (Prix Moyen)">ADR</span>
+            <span className="text-accent">KPI</span>
+          </div>
+          <div className="flex items-end gap-1 text-primary font-bold">
+            <span className="text-3xl">{(currentSiteStats?.adr || 0).toLocaleString()}</span>
+            <span className="text-[10px] mb-1 uppercase">FCFA</span>
+          </div>
+          <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50 pt-2 mt-2">
+            <span title="Revenue Per Available Room">RevPAR</span>
+            <span className="text-primary">{(currentSiteStats?.revpar || 0).toLocaleString()} FCFA</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
+          <div className="flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <span>En attente</span>
             <span className="p-1 px-2 bg-amber-100 text-amber-700 rounded text-[10px]">Alerte</span>
           </div>
-          <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-primary">{stats?.overall?.pendingReservations || 0}</span>
-            <span className="text-sm text-gray-400 mb-2">Demandes</span>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-primary">{stats?.overall?.pendingReservations || 0}</span>
+            <span className="text-xs text-gray-400 mb-1">Demandes</span>
           </div>
-          <Link href="/admin/front-desk" className="text-accent text-xs font-bold underline block text-left">
+          <Link href="/admin/front-desk" className="text-accent text-xs font-bold underline block text-left pt-1">
             Traiter maintenant
           </Link>
         </div>

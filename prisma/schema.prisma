@@ -57,6 +57,9 @@ model Reservation {
   client     User     @relation(fields: [clientId], references: [id])
   clientId   String
   kycData    KycData?
+  paymentIntentId String?
+  paymentStatus   String @default("UNPAID") // UNPAID, PARTIAL, PAID, FAILED
+  transactions    Transaction[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -118,6 +121,8 @@ model Transaction {
   description String?
   user        User     @relation(fields: [userId], references: [id])
   userId      String
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+  reservationId String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
