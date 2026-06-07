@@ -609,6 +609,7 @@ export default function HomeClient() {
   const currentData = siteData[currentSite];
   const [occupancy, setOccupancy] = useState<number | null>(null);
   const [dishes, setDishes] = useState<any[]>([]);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   useEffect(() => {
     const siteId = currentSite === 'Azaguié' ? 'azaguie' : 'yopougon';
@@ -654,24 +655,13 @@ export default function HomeClient() {
       {/* Hero Section */}
       <section className="relative h-[95vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
         <div id="hero-bg" className="absolute inset-0 z-0">
-          {currentData.heroVideo ? (
-            <video
-              src={currentData.heroVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover brightness-[0.35] scale-110"
-            />
-          ) : (
-            <Image
-              src={currentData.heroImage} 
-              alt="Hero Background"
-              fill
-              className="object-cover brightness-[0.35] scale-110"
-              priority
-            />
-          )}
+          <Image
+            src={currentData.heroImage} 
+            alt="Hero Background"
+            fill
+            className="object-cover brightness-[0.35] scale-110"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-sand" />
         </div>
 
@@ -707,13 +697,24 @@ export default function HomeClient() {
           <p className="font-body text-xl text-white/80 max-w-2xl mx-auto leading-relaxed animate-fade-in delay-500">
             {currentData.description}
           </p>
-          <div className="pt-8 flex flex-col sm:flex-row gap-6 justify-center animate-fade-in delay-700">
+          <div className="pt-8 flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in delay-700">
             <Link href="/chambres" className="bg-primary hover:bg-primary-dk text-white px-10 py-4 rounded-full font-bold text-lg transition-all shadow-2xl hover:scale-105 active:scale-95">
               Explorer nos Chambres
             </Link>
             <Link href="/restaurant" className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-10 py-4 rounded-full font-bold text-lg transition-all">
               Découvrir le Restaurant
             </Link>
+            {currentSite === 'Azaguié' && (
+              <button 
+                onClick={() => setIsVideoOpen(true)}
+                className="bg-accent hover:bg-white text-[#1A1208] px-10 py-4 rounded-full font-bold text-lg transition-all shadow-2xl flex items-center justify-center gap-2 hover:scale-105 active:scale-95 animate-pulse"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Regarder la Vidéo
+              </button>
+            )}
           </div>
         </div>
         
@@ -824,6 +825,30 @@ export default function HomeClient() {
 
       {/* Domain: Showcase des Services d'Exception (disponible sur les deux sites) */}
       <ServicesShowcaseSection />
+
+      {/* Presentation Video Section (Only for Azaguié) */}
+      {currentSite === 'Azaguié' && (
+        <section className="py-24 bg-[#FAF6F0] reveal border-b border-primary/5">
+          <div className="max-w-5xl mx-auto px-6 text-center space-y-12">
+            <div className="space-y-4">
+              <span className="font-body text-accent font-bold tracking-widest uppercase text-xs">Immersion</span>
+              <h2 className="font-title text-5xl font-bold text-primary">Découvrez le Domaine en Vidéo</h2>
+              <p className="max-w-2xl mx-auto text-[#6B5C4E]">
+                Laissez-vous guider à travers nos paysages verdoyants, nos installations de loisirs et nos bungalows chaleureux.
+              </p>
+            </div>
+            
+            <div className="relative aspect-video max-w-4xl mx-auto rounded-[2.5rem] overflow-hidden shadow-2xl border-2 border-primary/5 bg-black group">
+              <video 
+                src="/videos/azaguie.mp4" 
+                controls 
+                poster="/images/azaguie/greanland.png"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Domain: Loisirs & Activités - uniquement Azaguié */}
       {currentSite === 'Azaguié' && (
@@ -1079,6 +1104,33 @@ export default function HomeClient() {
           </div>
         </div>
       </footer>
+
+      {/* Lightbox Modal for Presentation Video */}
+      {isVideoOpen && (
+        <div 
+          onClick={() => setIsVideoOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="relative w-full max-w-4xl px-4 aspect-video"
+          >
+            <button 
+              onClick={() => setIsVideoOpen(false)}
+              className="absolute -top-14 right-4 text-white hover:text-accent text-3xl font-bold transition-colors p-2"
+              aria-label="Fermer la vidéo"
+            >
+              ✕
+            </button>
+            <video 
+              src="/videos/azaguie.mp4" 
+              controls 
+              autoPlay 
+              className="w-full h-full rounded-3xl shadow-2xl border-2 border-white/10"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
