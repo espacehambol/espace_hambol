@@ -27,7 +27,8 @@ export default function FrontDeskDashboard() {
     try {
       const siteMapping: Record<string, string> = { 'Azaguié': 'azaguie', 'Yopougon': 'yopougon' };
       const siteId = siteMapping[currentSite] || 'azaguie';
-      const res = await fetch(`/api/admin/reservations?siteId=${siteId}`);
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/reservations?siteId=${siteId}&t=${timestamp}`);
       const data = await res.json();
       setReservations(data.reservations || []);
     } catch (err) {

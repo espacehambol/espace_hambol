@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const siteId = searchParams.get('siteId');
@@ -23,5 +25,25 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Fetch incidents error:', error);
     return NextResponse.json({ incidents: [] });
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const { id, status } = await request.json();
+
+    if (!id || !status) {
+      return NextResponse.json({ error: 'ID and status are required' }, { status: 400 });
+    }
+
+    const updatedIncident = await prisma.conciergeRequest.update({
+      where: { id },
+      data: { status },
+    });
+
+    return NextResponse.json({ success: true, incident: updatedIncident });
+  } catch (error) {
+    console.error('Update incident status error:', error);
+    return NextResponse.json({ error: 'Failed to update incident status' }, { status: 500 });
   }
 }

@@ -33,9 +33,10 @@ export default function HousekeepingPage() {
       const siteMapping: Record<string, string> = { 'Azaguié': 'azaguie', 'Yopougon': 'yopougon' };
       const siteId = siteMapping[currentSite];
       
+      const timestamp = Date.now();
       const [roomsRes, incidentsRes] = await Promise.all([
-        fetch(`/api/admin/housekeeping?siteId=${siteId}`),
-        fetch(`/api/admin/incidents?siteId=${siteId}`)
+        fetch(`/api/admin/housekeeping?siteId=${siteId}&t=${timestamp}`),
+        fetch(`/api/admin/incidents?siteId=${siteId}&t=${timestamp}`)
       ]);
       
       const roomsData = await roomsRes.json();
@@ -71,6 +72,21 @@ export default function HousekeepingPage() {
         body: JSON.stringify({ roomId, status: nextStatus })
       });
       
+      if (res.ok) {
+        fetchRoomsAndIncidents();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const updateIncident = async (id: string, status: string) => {
+    try {
+      const res = await fetch('/api/admin/incidents', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
       if (res.ok) {
         fetchRoomsAndIncidents();
       }
@@ -160,7 +176,10 @@ export default function HousekeepingPage() {
                      <p className="text-xs text-white/50">Signalé via Concierge Digital {new Date(incident.createdAt).toLocaleTimeString()}</p>
                    </div>
                 </div>
-                <button className="px-4 py-2 bg-white text-[#1A1208] rounded-xl text-[10px] font-bold hover:bg-accent hover:text-white transition-all">
+                <button 
+                   onClick={() => updateIncident(incident.id, 'COMPLETED')}
+                   className="px-4 py-2 bg-white text-[#1A1208] rounded-xl text-[10px] font-bold hover:bg-accent hover:text-white transition-all"
+                 >
                   Intervenir
                 </button>
               </div>

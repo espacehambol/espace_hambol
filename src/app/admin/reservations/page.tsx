@@ -46,7 +46,8 @@ export default function ReservationsGrid() {
       const siteId = currentSite.toLowerCase().includes('azaguie') || currentSite.toLowerCase().includes('azaguié') 
         ? 'azaguie' 
         : 'yopougon';
-      const res = await fetch(`/api/admin/reservations?siteId=${siteId}`);
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/reservations?siteId=${siteId}&t=${timestamp}`);
       const data = await res.json();
       setReservations(data.reservations || []);
       setRooms(data.rooms || []);
