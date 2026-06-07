@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSite } from '@/context/SiteContext';
 
 const REVIEWS = [
   {
@@ -41,15 +42,27 @@ const REVIEWS = [
 ];
 
 export default function ReviewsCarousel() {
+  const { currentSite } = useSite();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Filtrer les avis en fonction du site sélectionné
+  const filteredReviews = REVIEWS.filter(review => review.site === currentSite);
+
+  // S'assurer que l'index courant est toujours valide après un changement de site
   useEffect(() => {
+    setCurrentIndex(0);
+  }, [currentSite]);
+
+  useEffect(() => {
+    if (filteredReviews.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % REVIEWS.length);
+      setCurrentIndex((prev) => (prev + 1) % filteredReviews.length);
     }, 5000); // Défilement automatique toutes les 5 secondes
 
     return () => clearInterval(timer);
-  }, []);
+  }, [filteredReviews.length]);
+
+  if (filteredReviews.length === 0) return null;
 
   return (
     <section className="py-24 bg-sand relative overflow-hidden">
@@ -62,11 +75,11 @@ export default function ReviewsCarousel() {
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         {/* Carousel Container */}
         <div className="relative h-[250px] sm:h-[200px] flex justify-center items-center">
-          {REVIEWS.map((review, idx) => {
+          {filteredReviews.map((review, idx) => {
             // Calculer la position relative pour l'effet de carrousel 3D
             let offset = idx - currentIndex;
-            if (offset < -2) offset += REVIEWS.length;
-            if (offset > 2) offset -= REVIEWS.length;
+            if (offset < -2) offset += filteredReviews.length;
+            if (offset > 2) offset -= filteredReviews.length;
 
             const isCenter = offset === 0;
             const isVisible = Math.abs(offset) <= 1;
@@ -109,7 +122,7 @@ export default function ReviewsCarousel() {
 
         {/* Bullets Navigation */}
         <div className="flex justify-center gap-3 mt-12">
-          {REVIEWS.map((_, idx) => (
+          {filteredReviews.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}

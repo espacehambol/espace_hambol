@@ -47,7 +47,7 @@ export default function SpecialOffers() {
           
           <h2 className="font-title text-4xl sm:text-5xl font-bold text-white leading-tight">
             Escapade Romantique <br/>
-            <span className="text-[#D4956A] italic">-15% sur les Suites VIP</span>
+            <span className="text-[#D4956A] italic">-15% sur les reservations en ligne</span>
           </h2>
           
           <p className="text-white/70 max-w-lg mx-auto md:mx-0 text-lg">
