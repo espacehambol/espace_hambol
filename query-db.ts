@@ -4,10 +4,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   const reservations = await prisma.reservation.findMany();
-  console.log('Reservations:', reservations.map(r => ({ id: r.id, status: r.status })));
+  console.log('Reservations:', reservations.map((r: any) => ({ id: r.id, status: r.status })));
 
   const requests = await prisma.conciergeRequest.findMany();
-  console.log('Requests:', requests.map(r => ({ id: r.id, status: r.status })));
+  console.log('Requests:', requests.map((r: any) => ({ id: r.id, status: r.status })));
 }
 
 main()
