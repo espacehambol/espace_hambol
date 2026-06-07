@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import fs from 'fs';
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +21,13 @@ export async function POST(request: Request) {
     const fileName = `item_${uniqueId}${extension}`;
     
     const relativePath = `/uploads/menu/${fileName}`;
-    const absolutePath = path.join(process.cwd(), 'public', 'uploads', 'menu', fileName);
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'menu');
+    const absolutePath = path.join(uploadDir, fileName);
+
+    // Créer le dossier s'il n'existe pas
+    if (!fs.existsSync(uploadDir)) {
+      await mkdir(uploadDir, { recursive: true });
+    }
 
     await writeFile(absolutePath, buffer);
     console.log(`Fichier sauvegardé: ${absolutePath}`);
