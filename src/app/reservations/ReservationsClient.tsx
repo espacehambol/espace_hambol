@@ -12,6 +12,7 @@ interface RoomType {
   description: string;
   price: number;
   capacity: number;
+  yieldReason?: string;
 }
 
 function RouterBackButton() {
@@ -46,7 +47,7 @@ function ReservationForm() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/room-types')
+    fetch(`/api/room-types?site=${encodeURIComponent(currentSite)}`)
       .then(res => res.json())
       .then(data => {
         setRoomTypes(data.roomTypes || []);
@@ -56,7 +57,7 @@ function ReservationForm() {
         console.error(err);
         setFetchingTypes(false);
       });
-  }, []);
+  }, [currentSite]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,8 +206,13 @@ function ReservationForm() {
                         <h3 className="text-xl font-bold text-[#8B3A1A] group-hover:text-[#2E7D1E] transition-colors">{type.name}</h3>
                         <p className="text-sm text-[#6B5C4E] mt-1">{type.description}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex flex-col items-end">
                         <div className="text-xl font-bold text-[#8B3A1A]">{type.price.toLocaleString()} FCFA</div>
+                        {type.yieldReason && type.yieldReason !== 'Tarif Standard' && (
+                          <span className="text-[9px] font-bold px-2 py-0.5 bg-[#2E7D1E]/10 text-[#2E7D1E] border border-[#2E7D1E]/20 rounded mt-1 whitespace-nowrap">
+                            {type.yieldReason}
+                          </span>
+                        )}
                       </div>
                     </button>
                   ))}

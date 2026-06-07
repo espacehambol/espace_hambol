@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const reset = request.nextUrl.searchParams.get('reset') === 'true';
     if (reset) {
       // Drop all tables in reverse order of foreign key constraints
+      await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "LostItem"`);
       await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "DishComponent"`);
       await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "Dish"`);
       await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "InventoryItem"`);
@@ -260,6 +261,23 @@ export async function GET(request: NextRequest) {
         "optional" BOOLEAN NOT NULL DEFAULT 0,
         "dishId" TEXT NOT NULL,
         FOREIGN KEY ("dishId") REFERENCES "Dish"("id") ON DELETE CASCADE
+      )
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "LostItem" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "name" TEXT NOT NULL,
+        "description" TEXT,
+        "photoUrl" TEXT,
+        "roomNumber" TEXT,
+        "status" TEXT NOT NULL DEFAULT 'FOUND',
+        "trackingNumber" TEXT,
+        "dateFound" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "siteId" TEXT NOT NULL,
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("siteId") REFERENCES "Site"("id") ON DELETE CASCADE
       )
     `);
 

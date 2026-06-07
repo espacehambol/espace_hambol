@@ -42,6 +42,14 @@ export default function GastronomyAdmin() {
   const { currentSite } = useSite();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Navigation tabs
+  const [activeTab, setActiveTab] = useState<'CARTE' | 'POS'>('CARTE');
+  const [activeRooms, setActiveRooms] = useState<any[]>([]);
+  const [posLoading, setPosLoading] = useState(false);
+  const [posForm, setPosForm] = useState({ reservationId: '', clientId: '', amount: '', description: '' });
+  const [recentPosTransactions, setRecentPosTransactions] = useState<any[]>([]);
+  const [submittingPos, setSubmittingPos] = useState(false);
 
   // Modale
   const [editDish, setEditDish] = useState<Dish | null>(null);    // null = création
@@ -65,7 +73,35 @@ export default function GastronomyAdmin() {
     finally { setIsLoading(false); }
   }, [siteId]);
 
-  useEffect(() => { fetchDishes(); }, [fetchDishes]);
+  const loadPosData = async () => {
+    setPosLoading(true);
+    try {
+      const [roomsRes, financeRes] = await Promise.all([
+        fetch('/api/admin/pos-routing'),
+        fetch('/api/admin/finance')
+      ]);
+      const roomsData = await roomsRes.json();
+      const financeData = await financeRes.json();
+      if (roomsData.success) {
+        setActiveRooms(roomsData.activeRooms || []);
+      }
+      if (financeData.transactions) {
+        const posTx = financeData.transactions.filter((t: any) => t.description.includes('Restauration POS'));
+        setRecentPosTransactions(posTx);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPosLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDishes();
+    if (activeTab === 'POS') {
+      loadPosData();
+    }
+  }, [fetchDishes, activeTab]);
 
   // ── Ouvrir modale ──────────────────────────────────────────────────
   const openCreate = () => {
@@ -192,6 +228,39 @@ export default function GastronomyAdmin() {
     }
   };
 
+  const handlePosSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!posForm.reservationId || !posForm.amount) return;
+    setSubmittingPos(true);
+    try {
+      const selectedRoom = activeRooms.find(r => r.reservationId === posForm.reservationId);
+      if (!selectedRoom) return;
+
+      const res = await fetch('/api/admin/pos-routing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reservationId: posForm.reservationId,
+          clientId: selectedRoom.clientId,
+          amount: parseFloat(posForm.amount),
+          itemsDescription: posForm.description
+        })
+      });
+
+      if (res.ok) {
+        alert('La note du restaurant a été imputée avec succès sur la facture de la chambre !');
+        setPosForm({ reservationId: '', clientId: '', amount: '', description: '' });
+        loadPosData();
+      } else {
+        alert("Erreur lors de l'imputation.");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingPos(false);
+    }
+  };
+
   return (
     <div className="space-y-10">
       {/* Header */}
@@ -200,16 +269,35 @@ export default function GastronomyAdmin() {
           <h1 className="text-3xl font-title font-bold text-primary">Gestion Gastronomique</h1>
           <p className="text-gray-400 text-sm">Menus &amp; Carte du Restaurant — {currentSite}</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-xl hover:bg-[#6e2c12] transition-all"
-        >
-          + Ajouter un Plat
-        </button>
+        {activeTab === 'CARTE' && (
+          <button
+            onClick={openCreate}
+            className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-xl hover:bg-[#6e2c12] transition-all"
+          >
+            + Ajouter un Plat
+          </button>
+        )}
       </header>
 
-      {/* Tableau */}
-      <div className="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
+      {/* Tabs navigation */}
+      <div className="flex gap-4 border-b border-gray-200 pb-px">
+        <button 
+          onClick={() => setActiveTab('CARTE')}
+          className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all ${activeTab === 'CARTE' ? 'border-primary text-primary' : 'border-transparent text-gray-500'}`}
+        >
+          La Carte du Restaurant
+        </button>
+        <button 
+          onClick={() => setActiveTab('POS')}
+          className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all ${activeTab === 'POS' ? 'border-primary text-primary' : 'border-transparent text-gray-500'}`}
+        >
+          Imputer Note sur Chambre (POS Routing)
+        </button>
+      </div>
+
+      {activeTab === 'CARTE' ? (
+        <>
+          <div className="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="font-bold text-lg">Menu Actuel</h3>
           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{dishes.length} Plats</span>
@@ -538,6 +626,111 @@ export default function GastronomyAdmin() {
                   >
                     Supprimer ce plat définitivement
                   </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+        </>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* POS Input Form */}
+          <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm h-fit space-y-6">
+            <div>
+              <h3 className="text-xl font-bold text-primary flex items-center gap-2 mb-1">
+                <span>🍽️</span> Nouvelle Note Restaurant
+              </h3>
+              <p className="text-xs text-gray-400">Ajouter les frais de restauration à une facture de chambre active</p>
+            </div>
+
+            <form onSubmit={handlePosSubmit} className="space-y-4 text-sm">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Sélectionner la Chambre</label>
+                {activeRooms.length === 0 ? (
+                  <p className="text-red-500 font-bold text-xs p-3 bg-red-50 rounded-xl border border-red-100">Aucune chambre occupée (check-in) sur ce site.</p>
+                ) : (
+                  <select 
+                    required 
+                    value={posForm.reservationId}
+                    onChange={(e) => setPosForm({...posForm, reservationId: e.target.value})}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none bg-white focus:ring-2 focus:ring-accent"
+                  >
+                    <option value="">-- Choisir une chambre active --</option>
+                    {activeRooms.map(room => (
+                      <option key={room.reservationId} value={room.reservationId}>
+                        Chambre {room.roomNumber} - {room.clientName}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Montant de la note (FCFA)</label>
+                <input 
+                  type="number" 
+                  required
+                  value={posForm.amount} 
+                  onChange={e => setPosForm({...posForm, amount: e.target.value})} 
+                  placeholder="Ex: 12500" 
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-accent" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Détails de la consommation</label>
+                <textarea 
+                  value={posForm.description} 
+                  onChange={e => setPosForm({...posForm, description: e.target.value})} 
+                  placeholder="Ex: 2x Kédjénou Carpe, 1x Attiéké, 3x Cody's" 
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-accent h-24 resize-none" 
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={submittingPos || activeRooms.length === 0}
+                className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-dk transition-all mt-2 uppercase tracking-widest text-xs shadow-md disabled:opacity-50"
+              >
+                {submittingPos ? 'Imputation...' : '✓ Imputer sur la facture'}
+              </button>
+            </form>
+          </div>
+
+          {/* Recent POS charges */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden p-8">
+              <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                <span>💰</span> Notes Restaurant Imputées Récemment
+              </h3>
+              
+              {posLoading ? (
+                <div className="py-10 text-center text-gray-400">Chargement...</div>
+              ) : recentPosTransactions.length === 0 ? (
+                <div className="py-20 text-center text-gray-400 space-y-4">
+                  <span className="text-4xl">🧾</span>
+                  <p className="font-bold">Aucune note imputée pour le moment.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-50 max-h-[400px] overflow-y-auto pr-2">
+                  {recentPosTransactions.map((tx) => (
+                    <div key={tx.id} className="py-4 flex justify-between items-center gap-4">
+                      <div className="space-y-1">
+                        <div className="flex gap-2 items-center">
+                          <span className="text-xs font-bold text-primary">Client: {tx.clientName}</span>
+                          <span className="bg-purple-50 text-purple-700 text-[10px] px-2 py-0.5 rounded border border-purple-100 font-mono">Restaurant POS</span>
+                        </div>
+                        <p className="text-xs text-gray-600 font-medium">{tx.description}</p>
+                        <p className="text-[10px] text-gray-400 font-mono">
+                          {new Date(tx.date).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-[#8B3A1A]">{tx.amount.toLocaleString()} FCFA</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

@@ -16,6 +16,7 @@ model Site {
   services  Service[]
   staff     Staff[]
   inventory InventoryItem[]
+  lostItems LostItem[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   dishes    Dish[]
@@ -215,4 +216,19 @@ model SystemSetting {
   value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model LostItem {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  photoUrl       String?
+  roomNumber     String?
+  status         String   @default("FOUND") // FOUND, CLAIMED, SHIPPED
+  trackingNumber String?
+  dateFound      DateTime @default(now())
+  site           Site     @relation(fields: [siteId], references: [id])
+  siteId         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

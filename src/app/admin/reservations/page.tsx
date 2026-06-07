@@ -32,6 +32,11 @@ export default function ReservationsGrid() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRes, setSelectedRes] = useState<Reservation | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'PLANNING' | 'CHANNEL_MANAGER'>('PLANNING');
+  const [channels, setChannels] = useState<any[]>([]);
+  const [syncLogs, setSyncLogs] = useState<any[]>([]);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [otaSyncing, setOtaSyncing] = useState(false);
 
   const daysCount = 14; 
   const days = Array.from({ length: daysCount }).map((_, i) => {
@@ -58,9 +63,52 @@ export default function ReservationsGrid() {
     }
   };
 
+  const loadChannelData = async () => {
+    setSyncLoading(true);
+    try {
+      const res = await fetch('/api/admin/channel-manager');
+      const data = await res.json();
+      if (data.success) {
+        setChannels(data.channels || []);
+        setSyncLogs(data.logs || []);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
-  }, [currentSite, viewDate]);
+    if (activeTab === 'CHANNEL_MANAGER') {
+      loadChannelData();
+    }
+  }, [currentSite, viewDate, activeTab]);
+
+  const handleOtaSync = async () => {
+    setOtaSyncing(true);
+    try {
+      const siteId = currentSite.toLowerCase().includes('azaguie') || currentSite.toLowerCase().includes('azaguié') 
+        ? 'azaguie' 
+        : 'yopougon';
+      const res = await fetch('/api/admin/channel-manager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sync', siteId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        await loadChannelData();
+        await loadData();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setOtaSyncing(false);
+    }
+  };
 
   const updateStatus = async (id: string, status: string) => {
     setProcessing(true);
@@ -102,8 +150,8 @@ export default function ReservationsGrid() {
     <div className="space-y-8">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-title font-bold text-primary text-primary-content">Planning des Chambres</h1>
-          <p className="text-gray-400 text-sm">Gestion visuelle des {rooms.length} suites — {currentSite}</p>
+          <h1 className="text-3xl font-title font-bold text-primary text-primary-content">Réservations & Canaux</h1>
+          <p className="text-gray-400 text-sm">Gestion des réservations en direct et via OTAs — {currentSite}</p>
         </div>
         <div className="flex gap-4">
           <button onClick={() => setIsModalOpen(true)} className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg hover:bg-primary-dk transition-all">
@@ -112,7 +160,25 @@ export default function ReservationsGrid() {
         </div>
       </header>
 
-      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+      {/* Tabs */}
+      <div className="flex gap-4 border-b border-gray-200 pb-px">
+        <button 
+          onClick={() => setActiveTab('PLANNING')}
+          className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all ${activeTab === 'PLANNING' ? 'border-primary text-primary' : 'border-transparent text-gray-500'}`}
+        >
+          Planning des Chambres
+        </button>
+        <button 
+          onClick={() => setActiveTab('CHANNEL_MANAGER')}
+          className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all ${activeTab === 'CHANNEL_MANAGER' ? 'border-primary text-primary' : 'border-transparent text-gray-500'}`}
+        >
+          Channel Manager (Synchro OTAs)
+        </button>
+      </div>
+
+      {activeTab === 'PLANNING' ? (
+        <>
+          <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-sand/20">
           <div className="flex gap-2">
             <button 
@@ -207,24 +273,96 @@ export default function ReservationsGrid() {
       </div>
 
 
-      <div className="flex gap-8">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-primary" />
-          <span className="text-xs text-gray-500 font-medium">Confirmée</span>
+          <div className="flex gap-8">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-primary" />
+              <span className="text-xs text-gray-500 font-medium">Confirmée</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-amber-100" />
+              <span className="text-xs text-gray-500 font-medium">En attente</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-blue-100" />
+              <span className="text-xs text-gray-500 font-medium">Terminée</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded border border-gray-100" />
+              <span className="text-xs text-gray-500 font-medium">Libre</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Channels Configuration */}
+          <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm h-fit space-y-6">
+            <div>
+              <h3 className="text-xl font-bold text-primary flex items-center gap-2 mb-1">
+                <span>🔗</span> Canaux Connectés
+              </h3>
+              <p className="text-xs text-gray-400">Statut de la liaison bidirectionnelle API</p>
+            </div>
+
+            <div className="space-y-4">
+              {syncLoading ? (
+                <div className="text-center py-6 text-gray-400">Chargement...</div>
+              ) : (
+                channels.map(chan => (
+                  <div key={chan.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{chan.icon}</span>
+                      <div>
+                        <h4 className="font-bold text-sm text-primary">{chan.name}</h4>
+                        <span className="text-[10px] font-bold uppercase text-gray-400">
+                          {chan.active ? 'Connecté' : 'Non configuré'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`w-3.5 h-3.5 rounded-full ${chan.active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  </div>
+                ))
+              )}
+            </div>
+
+            <button 
+              onClick={handleOtaSync} 
+              disabled={otaSyncing}
+              className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-dk transition-all mt-2 uppercase tracking-widest text-xs shadow-md disabled:opacity-50"
+            >
+              {otaSyncing ? 'Synchronisation...' : '🔄 Synchroniser (Import/Export)'}
+            </button>
+          </div>
+
+          {/* Sync History Logs */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden p-8">
+              <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                <span>📜</span> Historique de Synchronisation
+              </h3>
+              
+              <div className="divide-y divide-gray-50 max-h-[400px] overflow-y-auto pr-2">
+                {syncLogs.map((log) => (
+                  <div key={log.id} className="py-4 flex justify-between items-start gap-4">
+                    <div className="space-y-1">
+                      <div className="flex gap-2 items-center">
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                          log.status === 'SUCCESS' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                        }`}>
+                          {log.channel}
+                        </span>
+                        <p className="text-xs font-semibold text-gray-700">{log.details}</p>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-mono">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-amber-100" />
-          <span className="text-xs text-gray-500 font-medium">En attente</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-blue-100" />
-          <span className="text-xs text-gray-500 font-medium">Terminée</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded border border-gray-100" />
-          <span className="text-xs text-gray-500 font-medium">Libre</span>
-        </div>
-      </div>
+      )}
 
       {/* Action Modal (New Reservation) */}
       {isModalOpen && (
