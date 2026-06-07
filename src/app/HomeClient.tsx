@@ -545,6 +545,7 @@ export default function HomeClient() {
       subtitle: "Détente, sport et célébrations en plein air",
       description: "Au cœur d'Azaguié Ahoua, profitez de nos 11 chambres climatisées, notre piscine et nos terrains de Maracana. Le lieu idéal pour vos mariages et concerts.",
       heroImage: "/images/azaguie/greanland.png",
+      heroVideo: "/videos/azaguie.mp4",
       roomImage: "/images/azaguie/rooms/room_4.jpg",
       featureImage: "/images/azaguie/bungalow.jpg",
       rooms: ["11 Chambres Climatisées", "Salle de bain moderne", "TV & Wifi", "Accès Piscine"],
@@ -577,6 +578,7 @@ export default function HomeClient() {
       subtitle: "Confort urbain et détente en altitude",
       description: "Situé à Yopougon Ananeraie, l'Espace Hambol vous accueille avec ses 11 chambres de standing, son bar climatisé et sa terrasse panoramique au 4ème étage.",
       heroImage: "/images/yopougon/hero.jpg",
+      heroVideo: undefined,
       roomImage: "/images/yopougon/rooms/room_3.png",
       featureImage: "/images/yopougon/lavage.jpg",
       rooms: ["11 Chambres VIP", "Frigidaire individuel", "Balcon Privé", "Room Service"],
@@ -652,13 +654,24 @@ export default function HomeClient() {
       {/* Hero Section */}
       <section className="relative h-[95vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
         <div id="hero-bg" className="absolute inset-0 z-0">
-          <Image
-            src={currentData.heroImage} 
-            alt="Hero Background"
-            fill
-            className="object-cover brightness-[0.35] scale-110"
-            priority
-          />
+          {currentData.heroVideo ? (
+            <video
+              src={currentData.heroVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover brightness-[0.35] scale-110"
+            />
+          ) : (
+            <Image
+              src={currentData.heroImage} 
+              alt="Hero Background"
+              fill
+              className="object-cover brightness-[0.35] scale-110"
+              priority
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-sand" />
         </div>
 
