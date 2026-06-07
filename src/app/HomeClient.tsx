@@ -546,6 +546,7 @@ export default function HomeClient() {
       description: "Au cœur d'Azaguié Ahoua, profitez de nos 11 chambres climatisées, notre piscine et nos terrains de Maracana. Le lieu idéal pour vos mariages et concerts.",
       heroImage: "/images/azaguie/greanland.png",
       heroVideo: "/videos/azaguie.mp4",
+      bottomVideo: "/videos/azaguie.mp4",
       roomImage: "/images/azaguie/rooms/room_4.jpg",
       featureImage: "/images/azaguie/bungalow.jpg",
       rooms: ["11 Chambres Climatisées", "Salle de bain moderne", "TV & Wifi", "Accès Piscine"],
@@ -578,7 +579,8 @@ export default function HomeClient() {
       subtitle: "Confort urbain et détente en altitude",
       description: "Situé à Yopougon Ananeraie, l'Espace Hambol vous accueille avec ses 11 chambres de standing, son bar climatisé et sa terrasse panoramique au 4ème étage.",
       heroImage: "/images/yopougon/hero.jpg",
-      heroVideo: undefined,
+      heroVideo: "/videos/yopougon2.mp4",
+      bottomVideo: "/videos/yopougon.mp4",
       roomImage: "/images/yopougon/rooms/room_3.png",
       featureImage: "/images/yopougon/lavage.jpg",
       rooms: ["11 Chambres VIP", "Frigidaire individuel", "Balcon Privé", "Room Service"],
@@ -704,7 +706,7 @@ export default function HomeClient() {
             <Link href="/restaurant" className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-10 py-4 rounded-full font-bold text-lg transition-all">
               Découvrir le Restaurant
             </Link>
-            {currentSite === 'Azaguié' && (
+            {currentData.heroVideo && (
               <button 
                 onClick={() => setIsVideoOpen(true)}
                 className="bg-accent hover:bg-white text-[#1A1208] px-10 py-4 rounded-full font-bold text-lg transition-all shadow-2xl flex items-center justify-center gap-2 hover:scale-105 active:scale-95 animate-pulse"
@@ -826,23 +828,25 @@ export default function HomeClient() {
       {/* Domain: Showcase des Services d'Exception (disponible sur les deux sites) */}
       <ServicesShowcaseSection />
 
-      {/* Presentation Video Section (Only for Azaguié) */}
-      {currentSite === 'Azaguié' && (
+      {/* Presentation Video Section */}
+      {currentData.bottomVideo && (
         <section className="py-24 bg-[#FAF6F0] reveal border-b border-primary/5">
           <div className="max-w-5xl mx-auto px-6 text-center space-y-12">
             <div className="space-y-4">
               <span className="font-body text-accent font-bold tracking-widest uppercase text-xs">Immersion</span>
               <h2 className="font-title text-5xl font-bold text-primary">Découvrez le Domaine en Vidéo</h2>
               <p className="max-w-2xl mx-auto text-[#6B5C4E]">
-                Laissez-vous guider à travers nos paysages verdoyants, nos installations de loisirs et nos bungalows chaleureux.
+                {currentSite === 'Azaguié' 
+                  ? "Laissez-vous guider à travers nos paysages verdoyants, nos installations de loisirs et nos bungalows chaleureux."
+                  : "Découvrez notre établissement de standing, notre terrasse panoramique et nos espaces raffinés."}
               </p>
             </div>
             
             <div className="relative aspect-video max-w-4xl mx-auto rounded-[2.5rem] overflow-hidden shadow-2xl border-2 border-primary/5 bg-black group">
               <video 
-                src="/videos/azaguie.mp4" 
+                src={currentData.bottomVideo} 
                 controls 
-                poster="/images/azaguie/greanland.png"
+                poster={currentSite === 'Azaguié' ? "/images/azaguie/greanland.png" : "/images/yopougon/hero.jpg"}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -1123,7 +1127,7 @@ export default function HomeClient() {
               ✕
             </button>
             <video 
-              src="/videos/azaguie.mp4" 
+              src={currentData.heroVideo} 
               controls 
               autoPlay 
               className="w-full h-full rounded-3xl shadow-2xl border-2 border-white/10"
