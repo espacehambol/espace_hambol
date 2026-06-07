@@ -39,6 +39,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ── Screen size detection & responsive layout ─────────────────────────
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768; // md threshold
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // ── Protection des accès Admin ──────────────────────────────────────
   useEffect(() => {
@@ -106,18 +124,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isAuthorized = !currentMenuItem || position === 'SUPER_ADMIN' || currentMenuItem.roles.includes(position);
 
   return (
-    <div className="flex h-screen bg-[#F8F9FA] text-[#1A1208]">
+    <div className="flex h-screen bg-[#F8F9FA] text-[#1A1208] overflow-hidden relative">
+      {/* Sidebar Backdrop Overlay on Mobile */}
+      {isMobile && isSidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`bg-[#1A1208] text-white transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col shrink-0`}>
+      <aside 
+        className={`bg-[#1A1208] text-white transition-all duration-300 flex flex-col shrink-0 z-50 
+          ${isMobile 
+            ? `fixed inset-y-0 left-0 w-64 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}` 
+            : `${isSidebarOpen ? 'w-64' : 'w-20'}`
+          }
+        `}
+      >
         <div className="p-6 flex items-center justify-between">
-          {isSidebarOpen && <span className="font-title text-xl font-bold tracking-tighter">Hambol Admin</span>}
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-white/50 hover:text-white">
-            {isSidebarOpen ? '❮' : '❯'}
-          </button>
+          {(isSidebarOpen || isMobile) && <span className="font-title text-xl font-bold tracking-tighter">Hambol Admin</span>}
+          {!isMobile && (
+            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-white/50 hover:text-white">
+              {isSidebarOpen ? '❮' : '❯'}
+            </button>
+          )}
+          {isMobile && (
+            <button onClick={() => setSidebarOpen(false)} className="text-white/50 hover:text-white text-lg font-bold">
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Role Badge */}
-        {isSidebarOpen && (
+        {(isSidebarOpen || isMobile) && (
           <div className="mx-4 mb-4 px-4 py-2 bg-accent/10 border border-accent/20 rounded-xl">
             <p className="text-[10px] text-accent font-bold uppercase tracking-widest">{POSITION_LABELS[position] || position}</p>
             <p className="text-white text-xs font-bold truncate">{user?.name}</p>
@@ -129,26 +169,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               key={item.path} 
               href={item.path}
+              onClick={() => { if (isMobile) setSidebarOpen(false); }}
               className={`flex items-center gap-4 p-3 rounded-xl transition-all ${
                 pathname === item.path ? 'bg-accent text-black font-bold shadow-lg' : 'hover:bg-white/5 text-white/60 hover:text-white'
               }`}
             >
               <span className="text-xl shrink-0">{item.icon}</span>
-              {isSidebarOpen && <span className="font-medium text-sm">{item.name}</span>}
+              {(isSidebarOpen || isMobile) && <span className="font-medium text-sm">{item.name}</span>}
             </Link>
           ))}
         </nav>
 
         <div className="p-6 border-t border-white/5 space-y-4">
-           {isSidebarOpen && <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Site Actif</p>}
-           <div className={`flex flex-col gap-2 ${!isSidebarOpen && 'items-center'}`}>
+           {(isSidebarOpen || isMobile) && <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Site Actif</p>}
+           <div className={`flex flex-col gap-2 ${!(isSidebarOpen || isMobile) && 'items-center'}`}>
              <button 
                onClick={() => setCurrentSite('Azaguié')}
                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                  currentSite === 'Azaguié' ? 'bg-[#2E7D1E] text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'
                }`}
              >
-               {isSidebarOpen ? '🌿 Azaguié' : 'A'}
+               {(isSidebarOpen || isMobile) ? '🌿 Azaguié' : 'A'}
              </button>
              <button 
                onClick={() => setCurrentSite('Yopougon')}
@@ -156,41 +197,50 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                  currentSite === 'Yopougon' ? 'bg-[#8B3A1A] text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'
                }`}
              >
-               {isSidebarOpen ? '🏙️ Yopougon' : 'Y'}
+               {(isSidebarOpen || isMobile) ? '🏙️ Yopougon' : 'Y'}
              </button>
            </div>
            <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
              <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all text-xs font-bold">
-               <span>🏠</span>{isSidebarOpen && 'Accueil Public'}
+               <span>🏠</span>{(isSidebarOpen || isMobile) && 'Accueil Public'}
              </Link>
              <button onClick={logout} className="flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all text-xs font-bold">
-               <span>🚪</span>{isSidebarOpen && 'Déconnexion'}
+               <span>🚪</span>{(isSidebarOpen || isMobile) && 'Déconnexion'}
              </button>
            </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10">
+      <main className="flex-1 overflow-y-auto w-full">
+        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 md:px-10 sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Département :</span>
-             <span className="font-bold text-primary">
+            {isMobile && (
+              <button 
+                onClick={() => setSidebarOpen(true)} 
+                className="p-2 -ml-2 text-primary hover:bg-gray-50 rounded-xl transition-all font-bold text-xl"
+                title="Menu"
+              >
+                ☰
+              </button>
+            )}
+            <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400">Département :</span>
+             <span className="font-bold text-primary text-xs md:text-sm">
                {ALL_MENU_ITEMS.find(i => i.path === pathname)?.name || 'Espace Admin'}
              </span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6">
             <div className="flex flex-col text-right">
-              <span className="text-xs font-bold">{user?.name || 'Admin'}</span>
-              <span className="text-[10px] text-accent uppercase font-bold">{POSITION_LABELS[position] || 'Agent'}</span>
+              <span className="text-xs font-bold truncate max-w-[100px] md:max-w-none">{user?.name || 'Admin'}</span>
+              <span className="text-[9px] md:text-[10px] text-accent uppercase font-bold">{POSITION_LABELS[position] || 'Agent'}</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-sand flex items-center justify-center font-bold text-primary border border-accent/20 uppercase">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-sand flex items-center justify-center font-bold text-primary border border-accent/20 uppercase text-xs md:text-sm">
               {user?.name?.[0] || 'A'}
             </div>
           </div>
         </header>
 
-        <div className="p-10">
+        <div className="p-4 md:p-10">
           {isAuthorized ? children : (
             <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-[3rem] p-12 shadow-sm border border-gray-100 space-y-6 text-center animate-fade-in">
               <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-5xl animate-bounce">
