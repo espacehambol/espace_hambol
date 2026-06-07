@@ -21,6 +21,7 @@ interface Stats {
     revenue: number;
     adr: number;
     revpar: number;
+    projectedOccupancy?: number;
     rooms?: Array<{
       number: string;
       status: string;

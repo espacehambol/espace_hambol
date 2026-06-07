@@ -4,13 +4,13 @@ async function main() {
   const reservations = await prisma.reservation.findMany();
   console.log('Reservations length:', reservations.length);
   if (reservations.length > 0) {
-    console.log('Reservations:', reservations.map(r => ({ id: r.id, status: r.status })));
+    console.log('Reservations:', reservations.map((r: any) => ({ id: r.id, status: r.status })));
   }
 
   const requests = await prisma.conciergeRequest.findMany();
   console.log('Requests length:', requests.length);
   if (requests.length > 0) {
-    console.log('Requests:', requests.map(r => ({ id: r.id, status: r.status })));
+    console.log('Requests:', requests.map((r: any) => ({ id: r.id, status: r.status })));
   }
 }
 

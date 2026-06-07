@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const siteId = searchParams.get('siteId');
 
-    const whereClause = siteId ? { site: { name: { equals: siteId, mode: 'insensitive' } } } : {};
+    const whereClause = siteId ? { site: { name: siteId } } : {};
 
     const items = await (prisma as any).lostItem.findMany({
       where: whereClause,
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const { name, description, location, siteId } = body;
 
     const site = await prisma.site.findFirst({
-      where: { name: { equals: siteId, mode: 'insensitive' } }
+      where: { name: siteId }
     });
 
     if (!site) {
